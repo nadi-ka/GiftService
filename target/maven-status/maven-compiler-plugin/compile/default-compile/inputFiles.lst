@@ -1,0 +1,11 @@
+C:\Users\Vadim\eclipse-workspace\mjc-giftService\src\main\java\com\epam\esm\controller\RestController.java
+C:\Users\Vadim\eclipse-workspace\mjc-giftService\src\main\java\com\epam\esm\dal\constant\ColumnNameHolder.java
+C:\Users\Vadim\eclipse-workspace\mjc-giftService\src\main\java\com\epam\esm\config\DemoAppConfig.java
+C:\Users\Vadim\eclipse-workspace\mjc-giftService\src\main\java\com\epam\esm\dal\exception\DataSourceNamingException.java
+C:\Users\Vadim\eclipse-workspace\mjc-giftService\src\main\java\com\epam\esm\entity\Tag.java
+C:\Users\Vadim\eclipse-workspace\mjc-giftService\src\main\java\com\epam\esm\dal\TagDao.java
+C:\Users\Vadim\eclipse-workspace\mjc-giftService\src\main\java\com\epam\esm\dal\exception\DaoException.java
+C:\Users\Vadim\eclipse-workspace\mjc-giftService\src\main\java\com\epam\esm\entity\GiftSertificate.java
+C:\Users\Vadim\eclipse-workspace\mjc-giftService\src\main\java\com\epam\esm\dal\impl\TagDaoSql.java
+C:\Users\Vadim\eclipse-workspace\mjc-giftService\src\main\java\com\epam\esm\dal\pool_source\PoolSource.java
+C:\Users\Vadim\eclipse-workspace\mjc-giftService\src\main\java\com\epam\esm\config\SpringMvcDiapatcherServletInitializer.java

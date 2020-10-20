@@ -1,20 +1,15 @@
 package com.epam.esm.dal.impl;
 
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.List;
-import java.util.Map;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
 
 import com.epam.esm.dal.TagDao;
+import com.epam.esm.dal.TagMapper;
 import com.epam.esm.dal.constant.ColumnNameHolder;
-import com.epam.esm.dal.exception.DaoException;
 import com.epam.esm.dal.pool_source.PoolSource;
 import com.epam.esm.entity.Tag;
 
@@ -24,58 +19,41 @@ public class TagDaoSql implements TagDao {
 	private final JdbcTemplate jdbcTemplate;
 
 	private final static String sqlFindAllTags = "SELECT * FROM tag;";
-	
-	private static final Logger log = LogManager.getLogger(TagDaoSql.class);
+	private final static String sqlFindTagById = "SELECT * FROM tag WHERE ID = (?)";
 
 	public TagDaoSql(PoolSource poolSource) {
 		this.jdbcTemplate = new JdbcTemplate(poolSource.getDataSource());
-		log.info("in the constructor TagDaoSql");
+		
 	}
 
 	@Override
-	public int addTag(String tagName) throws DaoException {
+	public int addTag(String tagName)  {
 		// TODO Auto-generated method stub
 		return 0;
 	}
 
 	@Override
-	public void updateTag(long id, String tagName) throws DaoException {
+	public void updateTag(long id, String tagName) {
 		// TODO Auto-generated method stub
 
 	}
 
 	@Override
-	public List<Tag> findAllTags() throws DaoException {
-		
-//		try {
-//		Context initContext = new InitialContext();
-//        Context envContext  = (Context)initContext.lookup("java:/comp/env");
-//
-//		DataSource ds = (DataSource) envContext.lookup("jdbc/mjc-giftService");
-//		Connection conn = ds.getConnection();
-//
-//		Statement statement = conn.createStatement();
-//		String sql = "select * from tag";
-//		ResultSet rs = statement.executeQuery(sql);
-//
-//		List<Tag> tags = new ArrayList<Tag>();
-//
-//		while (rs.next()) {
-//			Long id = rs.getLong("Id");
-//			String tagName = rs.getString("Name");
-//			Tag tag = new Tag();
-//			tag.setId(id);
-//			tag.setName(tagName);
-//			tags.add(tag);
-//		}
-		
+	public List<Tag> findAllTags() {		
 		
 		return jdbcTemplate.query(sqlFindAllTags, ROW_MAPPER);
 
 	}
+	
+	@Override
+	public Tag findTag(long id) {
+		
+		Tag tag = jdbcTemplate.queryForObject(sqlFindTagById, new Object[] {id}, new TagMapper());
+		return tag;
+	}
 
 	@Override
-	public void deleteTag(long id) throws DaoException {
+	public void deleteTag(long id) {
 		// TODO Auto-generated method stub
 
 	}

@@ -1,14 +1,14 @@
-# Ignore Gradle project-specific cache directory
+# Ignore directory
 .idea
 
-# Ignore Gradle build output directory
+# Ignore directory
 .settings
 
-# Ignore Gradle build output directory
-.target
+# Ignore output build directory
+target
 
-# Ignore Gradle build output directory
+# Ignore directory
 .classpath
 
-# Ignore Gradle build output directory
+# Ignore directory
 .project

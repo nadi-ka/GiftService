@@ -6,12 +6,12 @@ import com.epam.esm.entity.Tag;
 
 public interface TagService {
 	
-	public List<Tag> getTags();
+	public List<Tag> getTags() throws ServiceException;
 
-	public void saveTag(Tag theTag);
+	public void saveTag(Tag theTag) throws ServiceException;
 
-	public Tag getTag(long theId);
+	public Tag getTag(long theId) throws ServiceException;
 
-	public void deleteTag(long theId);
+	public void deleteTag(long theId) throws ServiceException;
 
 }

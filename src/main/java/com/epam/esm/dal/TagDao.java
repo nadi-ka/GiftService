@@ -2,18 +2,19 @@ package com.epam.esm.dal;
 
 import java.util.List;
 
+import com.epam.esm.dal.exception.DaoException;
 import com.epam.esm.entity.Tag;
 
 public interface TagDao {
 	
-	int addTag(String tagName);
+	int addTag(Tag tag) throws DaoException;
 	
-	void updateTag(long id, String tagName);
+	void updateTag(long id, String tagName) throws DaoException;
 	
-	List<Tag> findAllTags();
+	List<Tag> findAllTags() throws DaoException;
 	
-	Tag findTag(long id);
+	Tag findTag(long id) throws DaoException;
 
-	void deleteTag(long id);
+	void deleteTag(long id) throws DaoException;
 
 }

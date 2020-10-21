@@ -23,7 +23,7 @@ public class PoolSource {
 			Context envContext = (Context) initContext.lookup(envContextLocation);
 			this.dataSource = (DataSource) envContext.lookup(resourceName);
 		} catch (NamingException e) {
-			throw new DataSourceNamingException();
+			throw new DataSourceNamingException("The Tomcat pool wasn't created", e);
 		}
 	}
 

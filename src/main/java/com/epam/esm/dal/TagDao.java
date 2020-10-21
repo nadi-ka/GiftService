@@ -9,12 +9,12 @@ public interface TagDao {
 	
 	int addTag(Tag tag) throws DaoException;
 	
-	void updateTag(long id, String tagName) throws DaoException;
+	int updateTag(Tag tag) throws DaoException;
 	
 	List<Tag> findAllTags() throws DaoException;
 	
 	Tag findTag(long id) throws DaoException;
 
-	void deleteTag(long id) throws DaoException;
+	int deleteTag(long id) throws DaoException;
 
 }

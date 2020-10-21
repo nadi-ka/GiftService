@@ -28,7 +28,7 @@ public class TagServiceImpl implements TagService {
 		try {
 			tags = tagDao.findAllTags();
 		} catch (DaoException e) {
-			throw new ServiceException("Exception when call getTags() from TagServiceImpl", e);
+			throw new ServiceException("Exception when calling getTags() from TagServiceImpl", e);
 		}
 		return tags;
 	}
@@ -39,7 +39,7 @@ public class TagServiceImpl implements TagService {
 		try {
 			updatedRows = tagDao.addTag(theTag);
 		} catch (DaoException e) {
-			throw new ServiceException("Exception when call saveTag() from TagServiceImpl", e);
+			throw new ServiceException("Exception when calling saveTag() from TagServiceImpl", e);
 		}
 		if (updatedRows == 0) {
 			throw new ServiceException("The tag wasn't saved: " + theTag);
@@ -53,16 +53,38 @@ public class TagServiceImpl implements TagService {
 		Tag tag;
 		try {
 			tag = tagDao.findTag(theId);
-		}catch (DaoException e) {
-			throw new ServiceException("Exception when call sgetTag() from TagServiceImpl", e);
+		} catch (DaoException e) {
+			throw new ServiceException("Exception when calling sgetTag() from TagServiceImpl", e);
 		}
 		return tag;
 	}
 
 	@Override
-	public void deleteTag(long theId) throws ServiceException {
-		// TODO Auto-generated method stub
+	public void updateTag(Tag theTag) throws ServiceException {
 
+		int affectedRows = 0;
+		try {
+			affectedRows = tagDao.updateTag(theTag);
+		} catch (DaoException e) {
+			throw new ServiceException("Exception when calling updateTag() from TagServiceImpl", e);
+		}
+		if (affectedRows == 0) {
+			throw new ServiceException("The tag wasn't saved: " + theTag);
+		}
+	}
+
+	@Override
+	public void deleteTag(long theId) throws ServiceException {
+
+		int affectedRows = 0;
+		try {
+			affectedRows = tagDao.deleteTag(theId);
+		} catch (DaoException e) {
+			throw new ServiceException("Exception when calling deleteTag() from TagServiceImpl", e);
+		}
+		if (affectedRows == 0) {
+			throw new ServiceException("The tag wasn't deleted, tagId - " + theId);
+		}
 	}
 
 }

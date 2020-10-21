@@ -15,7 +15,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.epam.esm.controller.exception.NotFoundException;
 import com.epam.esm.controller.exception.NotSavedException;
+import com.epam.esm.entity.GiftSertificate;
 import com.epam.esm.entity.Tag;
+import com.epam.esm.service.SertificateService;
 import com.epam.esm.service.ServiceException;
 import com.epam.esm.service.TagService;
 
@@ -27,6 +29,9 @@ public class RestController {
 
 	@Autowired
 	private TagService tagService;
+	
+	@Autowired
+	private SertificateService sertificateService;
 
 	@GetMapping("/tags")
 	public List<Tag> getTags() {
@@ -63,7 +68,32 @@ public class RestController {
 			log.log(Level.ERROR, "Error when calling PostMapping comand addTag() from the RestController", e);
 			throw new NotSavedException("The tag wasn't saved", e);
 		}
+	}
+	
+	@GetMapping("/sertificates")
+	public List<GiftSertificate> getSertificates() {
 
+		List<GiftSertificate> sertificates = new ArrayList<GiftSertificate>();
+		try {
+			sertificates = sertificateService.getSertificates();
+		} catch (ServiceException e) {
+			log.log(Level.ERROR, "Error when calling GetMapping comand getSertificates() from the RestController", e);
+			throw new NotFoundException("Nothing was found by the request", e);
+		}
+		return sertificates;
+	}
+	
+	@GetMapping("/sertificates/{sertificateId}")
+	public GiftSertificate getSertificate(@PathVariable long sertificateId) {
+
+		GiftSertificate giftSertificate;
+		try {
+			giftSertificate = sertificateService.getSertificate(sertificateId);
+		}catch (ServiceException e) {
+			log.log(Level.ERROR, "Error when calling GetMapping comand getSertificate() from the RestController", e);
+			throw new NotFoundException("The sertificate wasn't found", e);
+		}
+		return giftSertificate;
 	}
 
 }

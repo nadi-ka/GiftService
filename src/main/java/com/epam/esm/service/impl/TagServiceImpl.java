@@ -1,6 +1,5 @@
 package com.epam.esm.service.impl;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
@@ -51,7 +50,7 @@ public class TagServiceImpl implements TagService {
 	@Override
 	public Tag getTag(long theId) throws ServiceException {
 
-		Tag tag = null;
+		Tag tag;
 		try {
 			tag = tagDao.findTag(theId);
 		}catch (DaoException e) {

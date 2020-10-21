@@ -1,9 +1,6 @@
 package com.epam.esm.dal.impl;
 
 import java.sql.ResultSet;
-import java.sql.Types;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
@@ -11,22 +8,21 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 
 import com.epam.esm.dal.TagDao;
-import com.epam.esm.dal.TagMapper;
 import com.epam.esm.dal.constant.ColumnNameHolder;
 import com.epam.esm.dal.exception.DaoException;
 import com.epam.esm.dal.pool_source.PoolSource;
 import com.epam.esm.entity.Tag;
 
-@Component
+@Repository
 public class TagDaoSql implements TagDao {
 
 	private final JdbcTemplate jdbcTemplate;
 
 	private final static String sqlFindAllTags = "SELECT * FROM tag;";
-	private final static String sqlFindTagById = "SELECT * FROM tag WHERE ID = (?)";
+	private final static String sqlFindTagById = "SELECT * FROM tag WHERE Id = (?)";
 	private static final String sqlAddTag = "INSERT INTO tag (Name) VALUES (?)";
 
 	private static final Logger log = LogManager.getLogger(TagDaoSql.class);

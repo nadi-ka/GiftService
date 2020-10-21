@@ -19,8 +19,7 @@ public class GiftSertificate {
 	}
 
 	public GiftSertificate(long id, String name, String description, BigDecimal price, LocalDateTime creationDate,
-			LocalDateTime lastUpdateDate, Long duration, List<Tag> tags) {
-		super();
+			LocalDateTime lastUpdateDate, Long duration) {
 		this.id = id;
 		this.name = name;
 		this.description = description;
@@ -28,6 +27,11 @@ public class GiftSertificate {
 		this.creationDate = creationDate;
 		this.lastUpdateDate = lastUpdateDate;
 		this.duration = duration;
+	}
+	
+	public GiftSertificate(long id, String name, String description, BigDecimal price, LocalDateTime creationDate,
+			LocalDateTime lastUpdateDate, Long duration, List<Tag> tags) {
+		this(id, name, description, price, creationDate, lastUpdateDate, duration);
 		this.tags = tags;
 	}
 

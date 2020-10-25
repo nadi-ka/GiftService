@@ -1,4 +1,4 @@
-package com.epam.esm.controller.exception_handler;
+package com.epam.esm.rest.exception_handler;
 
 public class ErrorResponse {
 

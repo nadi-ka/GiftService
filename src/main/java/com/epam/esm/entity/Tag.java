@@ -6,7 +6,7 @@ public class Tag {
 
 	private long id;
 	private String name;
-	private List<GiftSertificate> sertificates;
+	private List<GiftCertificate> certificates;
 
 	public Tag() {
 	}
@@ -16,9 +16,9 @@ public class Tag {
 		this.name = name;
 	}
 	
-	public Tag(long id, String name, List<GiftSertificate> sertificates) {
+	public Tag(long id, String name, List<GiftCertificate> certificates) {
 		this(id, name);
-		this.sertificates = sertificates;
+		this.certificates = certificates;
 	}
 
 	public long getId() {
@@ -37,12 +37,12 @@ public class Tag {
 		this.name = name;
 	}
 	
-	public List<GiftSertificate> getSertificates() {
-		return sertificates;
+	public List<GiftCertificate> getCertificates() {
+		return certificates;
 	}
 
-	public void setSertificates(List<GiftSertificate> sertificates) {
-		this.sertificates = sertificates;
+	public void setCertificates(List<GiftCertificate> certificates) {
+		this.certificates = certificates;
 	}
 
 	@Override
@@ -51,7 +51,7 @@ public class Tag {
 		int result = 1;
 		result = prime * result + (int) (id ^ (id >>> 32));
 		result = prime * result + ((name == null) ? 0 : name.hashCode());
-		result = prime * result + ((sertificates == null) ? 0 : sertificates.hashCode());
+		result = prime * result + ((certificates == null) ? 0 : certificates.hashCode());
 		return result;
 	}
 
@@ -71,10 +71,10 @@ public class Tag {
 				return false;
 		} else if (!name.equals(other.name))
 			return false;
-		if (sertificates == null) {
-			if (other.sertificates != null)
+		if (certificates == null) {
+			if (other.certificates != null)
 				return false;
-		} else if (!sertificates.equals(other.sertificates))
+		} else if (!certificates.equals(other.certificates))
 			return false;
 		return true;
 	}

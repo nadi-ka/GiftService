@@ -1,25 +1,31 @@
 package com.epam.esm.entity;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
-public class GiftSertificate {
-	
+import com.fasterxml.jackson.annotation.JsonFormat;
+
+public class GiftCertificate {
+
 	private long id;
 	private String name;
 	private String description;
-	private BigDecimal price;
+	private double price;
+
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Europe/Minsk")
 	private LocalDateTime creationDate;
+
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "UTC")
 	private LocalDateTime lastUpdateDate;
-	private Long duration;
+
+	private int duration;
 	private List<Tag> tags;
-	
-	public GiftSertificate() {	
+
+	public GiftCertificate() {
 	}
 
-	public GiftSertificate(long id, String name, String description, BigDecimal price, LocalDateTime creationDate,
-			LocalDateTime lastUpdateDate, Long duration) {
+	public GiftCertificate(long id, String name, String description, double price, LocalDateTime creationDate,
+			LocalDateTime lastUpdateDate, int duration) {
 		this.id = id;
 		this.name = name;
 		this.description = description;
@@ -28,9 +34,9 @@ public class GiftSertificate {
 		this.lastUpdateDate = lastUpdateDate;
 		this.duration = duration;
 	}
-	
-	public GiftSertificate(long id, String name, String description, BigDecimal price, LocalDateTime creationDate,
-			LocalDateTime lastUpdateDate, Long duration, List<Tag> tags) {
+
+	public GiftCertificate(long id, String name, String description, double price, LocalDateTime creationDate,
+			LocalDateTime lastUpdateDate, int duration, List<Tag> tags) {
 		this(id, name, description, price, creationDate, lastUpdateDate, duration);
 		this.tags = tags;
 	}
@@ -59,11 +65,11 @@ public class GiftSertificate {
 		this.description = description;
 	}
 
-	public BigDecimal getPrice() {
+	public double getPrice() {
 		return price;
 	}
 
-	public void setPrice(BigDecimal price) {
+	public void setPrice(double price) {
 		this.price = price;
 	}
 
@@ -83,11 +89,11 @@ public class GiftSertificate {
 		this.lastUpdateDate = lastUpdateDate;
 	}
 
-	public Long getDuration() {
+	public int getDuration() {
 		return duration;
 	}
 
-	public void setDuration(Long duration) {
+	public void setDuration(int duration) {
 		this.duration = duration;
 	}
 
@@ -105,11 +111,13 @@ public class GiftSertificate {
 		int result = 1;
 		result = prime * result + ((creationDate == null) ? 0 : creationDate.hashCode());
 		result = prime * result + ((description == null) ? 0 : description.hashCode());
-		result = prime * result + ((duration == null) ? 0 : duration.hashCode());
+		result = prime * result + duration;
 		result = prime * result + (int) (id ^ (id >>> 32));
 		result = prime * result + ((lastUpdateDate == null) ? 0 : lastUpdateDate.hashCode());
 		result = prime * result + ((name == null) ? 0 : name.hashCode());
-		result = prime * result + ((price == null) ? 0 : price.hashCode());
+		long temp;
+		temp = Double.doubleToLongBits(price);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
 		result = prime * result + ((tags == null) ? 0 : tags.hashCode());
 		return result;
 	}
@@ -122,7 +130,7 @@ public class GiftSertificate {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		GiftSertificate other = (GiftSertificate) obj;
+		GiftCertificate other = (GiftCertificate) obj;
 		if (creationDate == null) {
 			if (other.creationDate != null)
 				return false;
@@ -133,10 +141,7 @@ public class GiftSertificate {
 				return false;
 		} else if (!description.equals(other.description))
 			return false;
-		if (duration == null) {
-			if (other.duration != null)
-				return false;
-		} else if (!duration.equals(other.duration))
+		if (duration != other.duration)
 			return false;
 		if (id != other.id)
 			return false;
@@ -150,10 +155,7 @@ public class GiftSertificate {
 				return false;
 		} else if (!name.equals(other.name))
 			return false;
-		if (price == null) {
-			if (other.price != null)
-				return false;
-		} else if (!price.equals(other.price))
+		if (Double.doubleToLongBits(price) != Double.doubleToLongBits(other.price))
 			return false;
 		if (tags == null) {
 			if (other.tags != null)
@@ -165,9 +167,9 @@ public class GiftSertificate {
 
 	@Override
 	public String toString() {
-		return "GiftSertificate [id=" + id + ", name=" + name + ", description=" + description + ", price=" + price
+		return "GiftCertificate [id=" + id + ", name=" + name + ", description=" + description + ", price=" + price
 				+ ", creationDate=" + creationDate + ", lastUpdateDate=" + lastUpdateDate + ", duration=" + duration
 				+ "]";
 	}
-	
+
 }

@@ -2,18 +2,19 @@ package com.epam.esm.service;
 
 import java.util.List;
 
-import com.epam.esm.entity.Tag;
+import com.epam.esm.dto.TagDTO;
+import com.epam.esm.service.exception.ServiceException;
 
 public interface TagService {
 	
-	public List<Tag> getTags() throws ServiceException;
+	List<TagDTO> getTags() throws ServiceException;
 	
-	public Tag getTag(long theId) throws ServiceException;
+	TagDTO getTag(long theId);
 
-	public void saveTag(Tag theTag) throws ServiceException;
+	TagDTO saveTag(TagDTO theTag) throws ServiceException;
 
-	public void updateTag(Tag theTag) throws ServiceException;
+	void updateTag(TagDTO theTag) throws ServiceException;
 
-	public void deleteTag(long theId) throws ServiceException;
+	void deleteTag(long theId) throws ServiceException;
 
 }

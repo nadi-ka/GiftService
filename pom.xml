@@ -54,6 +54,12 @@
 		<artifactId>jackson-databind</artifactId>
 		<version>2.9.5</version>
 	</dependency>
+	
+	<dependency>
+    	<groupId>com.fasterxml.jackson.datatype</groupId>
+    	<artifactId>jackson-datatype-jsr310</artifactId>
+    	<version>2.6.0</version>
+	</dependency>
     
     <!-- https://mvnrepository.com/artifact/mysql/mysql-connector-java -->
 	<dependency>
@@ -103,6 +109,13 @@
     	<groupId>org.springframework</groupId>
     	<artifactId>spring-jdbc</artifactId>
     	<version>5.2.9.RELEASE</version>
+	</dependency>
+	
+	<!-- Model mapper for DTO-pattern -->
+	<dependency>
+    	<groupId>org.modelmapper</groupId>
+    	<artifactId>modelmapper</artifactId>
+    	<version>2.3.5</version>
 	</dependency>
 
   </dependencies>

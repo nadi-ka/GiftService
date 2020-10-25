@@ -1,17 +1,22 @@
 package com.epam.esm.service.impl;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.epam.esm.dal.TagDao;
 import com.epam.esm.dal.exception.DaoException;
+import com.epam.esm.dto.TagDTO;
 import com.epam.esm.entity.Tag;
-import com.epam.esm.service.ServiceException;
 import com.epam.esm.service.TagService;
+import com.epam.esm.service.exception.IllegalOperationServiceException;
+import com.epam.esm.service.exception.ServiceException;
 
 @Service
 public class TagServiceImpl implements TagService {
@@ -21,50 +26,53 @@ public class TagServiceImpl implements TagService {
 	@Autowired
 	private TagDao tagDao;
 
+	@Autowired
+	private ModelMapper modelMapper;
+
 	@Override
-	public List<Tag> getTags() throws ServiceException {
+	public List<TagDTO> getTags() throws ServiceException {
 
 		List<Tag> tags;
 		try {
 			tags = tagDao.findAllTags();
+
 		} catch (DaoException e) {
 			throw new ServiceException("Exception when calling getTags() from TagServiceImpl", e);
 		}
-		return tags;
+		return tags.stream().map(this::convertToDto).collect(Collectors.toList());
 	}
 
 	@Override
-	public void saveTag(Tag theTag) throws ServiceException {
-		int updatedRows = 0;
+	public TagDTO saveTag(TagDTO theTag) throws ServiceException {
+
+		Tag resultTag = null;
+
 		try {
-			updatedRows = tagDao.addTag(theTag);
+			resultTag = tagDao.addTag(convertToEntity(theTag));
+
 		} catch (DaoException e) {
 			throw new ServiceException("Exception when calling saveTag() from TagServiceImpl", e);
 		}
-		if (updatedRows == 0) {
-			throw new ServiceException("The tag wasn't saved: " + theTag);
-		}
-
+		return convertToDto(resultTag);
 	}
 
 	@Override
-	public Tag getTag(long theId) throws ServiceException {
+	public TagDTO getTag(long theId) {
 
-		Tag tag;
-		try {
-			tag = tagDao.findTag(theId);
-		} catch (DaoException e) {
-			throw new ServiceException("Exception when calling sgetTag() from TagServiceImpl", e);
+		Tag tag = tagDao.findTag(theId);
+
+		if (tag == null) {
+			return null;
 		}
-		return tag;
+		return convertToDto(tag);
 	}
 
 	@Override
-	public void updateTag(Tag theTag) throws ServiceException {
+	public void updateTag(TagDTO theTag) throws ServiceException {
 
 		int affectedRows = 0;
 		try {
-			affectedRows = tagDao.updateTag(theTag);
+			affectedRows = tagDao.updateTag(convertToEntity(theTag));
 		} catch (DaoException e) {
 			throw new ServiceException("Exception when calling updateTag() from TagServiceImpl", e);
 		}
@@ -77,6 +85,17 @@ public class TagServiceImpl implements TagService {
 	public void deleteTag(long theId) throws ServiceException {
 
 		int affectedRows = 0;
+
+		// check if there is at least one certificate, bounded with the tag for delete
+		// operation;
+		// if the method returns cartificateId - the operation will be forbidden;
+		// if the method returns cartificateId=0, the tag could be deleted;
+		long certificateId = tagDao.findCertificateIdByTagId(theId);
+		
+		if (certificateId != 0) {
+			throw new IllegalOperationServiceException(
+					"The tag is bounded with one or more certififcates and coudn't be deleted, tagId - " + theId);
+		}	
 		try {
 			affectedRows = tagDao.deleteTag(theId);
 		} catch (DaoException e) {
@@ -85,6 +104,24 @@ public class TagServiceImpl implements TagService {
 		if (affectedRows == 0) {
 			throw new ServiceException("The tag wasn't deleted, tagId - " + theId);
 		}
+	}
+
+	private TagDTO convertToDto(Tag tag) {
+
+		if (tag.getCertificates() == null) {
+			tag.setCertificates(Collections.emptyList());
+		}
+
+		TagDTO tagDTO = modelMapper.map(tag, TagDTO.class);
+
+		return tagDTO;
+	}
+
+	private Tag convertToEntity(TagDTO tagDTO) {
+
+		Tag tag = modelMapper.map(tagDTO, Tag.class);
+
+		return tag;
 	}
 
 }

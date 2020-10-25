@@ -1,4 +1,4 @@
-package com.epam.esm.controller.exception;
+package com.epam.esm.rest.exception;
 
 public class NotSavedException extends RuntimeException {
 	

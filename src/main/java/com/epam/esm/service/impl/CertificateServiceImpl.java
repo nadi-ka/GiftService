@@ -1,5 +1,6 @@
 package com.epam.esm.service.impl;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -17,6 +18,7 @@ import com.epam.esm.dto.GiftCertificateGetDTO;
 import com.epam.esm.dto.GiftCertificateGetForCreationDTO;
 import com.epam.esm.dto.GiftCertificateGetForUpdateDTO;
 import com.epam.esm.entity.GiftCertificate;
+import com.epam.esm.entity.search_param.SearchParameters;
 import com.epam.esm.service.CertificateService;
 import com.epam.esm.service.exception.ServiceException;
 import com.epam.esm.service.util.DateTimeFormatterISO;
@@ -29,7 +31,7 @@ public class CertificateServiceImpl implements CertificateService {
 
 	@Autowired
 	private ModelMapper modelMapper;
-	
+
 	private static final Logger log = LogManager.getLogger(CertificateServiceImpl.class);
 
 	@Override
@@ -48,7 +50,7 @@ public class CertificateServiceImpl implements CertificateService {
 	public GiftCertificateGetDTO getCertificate(long theId) {
 
 		GiftCertificate certificate = certificateDao.findCertificate(theId);
-		
+
 		if (certificate == null) {
 			return null;
 		}
@@ -56,14 +58,15 @@ public class CertificateServiceImpl implements CertificateService {
 	}
 
 	@Override
-	public GiftCertificateGetForCreationDTO saveCertificate(GiftCertificateCreateUpdateDTO theCertificate) throws ServiceException {
+	public GiftCertificateGetForCreationDTO saveCertificate(GiftCertificateCreateUpdateDTO theCertificate)
+			throws ServiceException {
 
 		GiftCertificate certificateToAdd = convertToEntity(theCertificate);
-		
+
 		// set the creation Date and Time(now) and format in accordance with ISO-8601
-		
+
 		certificateToAdd.setCreationDate(DateTimeFormatterISO.createAndformatDateTime());
-		
+
 		GiftCertificate addedCertificate;
 		try {
 			addedCertificate = certificateDao.addCertificate(certificateToAdd);
@@ -74,13 +77,14 @@ public class CertificateServiceImpl implements CertificateService {
 	}
 
 	@Override
-	public GiftCertificateGetForUpdateDTO updateCertificate(GiftCertificateCreateUpdateDTO theCertificate) throws ServiceException {
+	public GiftCertificateGetForUpdateDTO updateCertificate(GiftCertificateCreateUpdateDTO theCertificate)
+			throws ServiceException {
 
 		GiftCertificate certificateToUpdate = convertToEntity(theCertificate);
-		
+
 		// set LastUpdateDate and Time(now) and format in accordance with ISO-8601
 		certificateToUpdate.setLastUpdateDate(DateTimeFormatterISO.createAndformatDateTime());
-		
+
 		GiftCertificate updatedCertificate;
 		try {
 			updatedCertificate = certificateDao.updateCertificate(certificateToUpdate);
@@ -100,18 +104,79 @@ public class CertificateServiceImpl implements CertificateService {
 		}
 	}
 
-//	@Override
-//	public List<GiftCertificateDTO> getAllCertificatesByTagName(String tagName) {
-//		
-//		Tag tag = tagDao.findAllCertificatesByTagId(theId);
-//		if (tag == null) {
-//			return null;
-//		}
-//		return convertToDto(tag);
-//	}
+	@Override
+	public List<GiftCertificateGetDTO> getCertificatesByTagName(String tagName) throws ServiceException {
+
+		List<GiftCertificate> certificates;
+		try {
+			certificates = certificateDao.findCertificatesByTagName(tagName);
+		} catch (DaoException e) {
+			throw new ServiceException("Exception when calling getCertificatesByTagName() from CertificateServiceImpl",
+					e);
+		}
+		return certificates.stream().map(this::convertToDto).collect(Collectors.toList());
+	}
+
+	@Override
+	public List<GiftCertificateGetDTO> getCertificatesByPartOfName(String nameContains)
+			throws ServiceException {
+
+		List<GiftCertificate> certificates;
+		try {
+			certificates = certificateDao.findCertificatesByPartOfName(nameContains);
+			
+		} catch (DaoException e) {
+			throw new ServiceException(
+					"Exception when calling getCertificatesByPartOfName() from CertificateServiceImpl", e);
+		}
+		return certificates.stream().map(this::convertToDto).collect(Collectors.toList());
+	}
+	
+	@Override
+	public List<GiftCertificateGetDTO> getCertificatesByDescription(String description)
+			throws ServiceException {
+
+		List<GiftCertificate> certificates;
+		try {
+			certificates = certificateDao.findCertificatesByDescription(description);
+			
+		} catch (DaoException e) {
+			throw new ServiceException(
+					"Exception when calling getCertificatesByDescription() from CertificateServiceImpl", e);
+		}
+		return certificates.stream().map(this::convertToDto).collect(Collectors.toList());
+	}
+
+	@Override
+	public List<GiftCertificateGetDTO> getCertificatesSorted(String sortBy, String sortDirection)
+			throws ServiceException {
+
+		List<GiftCertificate> certificates = new ArrayList<GiftCertificate>();
+		SearchParameters searchParameter = SearchParameters.getSearchParameters(sortBy);
+		try {
+			switch (searchParameter) {
+
+			case CREATION_DATE:
+				certificates = certificateDao.sortCertificatesByDate(sortDirection);
+				break;
+
+			case CERTIFICATE_NAME:
+				certificates = certificateDao.sortCertificatesByName(sortDirection);
+				break;
+
+			default:
+				certificates = certificateDao.sortCertificatesByName(sortDirection);
+			}
+
+		} catch (DaoException e) {
+			throw new ServiceException(
+					"Exception when calling getCertificatesByDateSorted() from CertificateServiceImpl", e);
+		}
+		return certificates.stream().map(this::convertToDto).collect(Collectors.toList());
+	}
 
 	private GiftCertificateGetDTO convertToDto(GiftCertificate giftCertificate) {
-		
+
 		if (giftCertificate.getTags() == null) {
 			giftCertificate.setTags(Collections.emptyList());
 		}
@@ -120,25 +185,27 @@ public class CertificateServiceImpl implements CertificateService {
 
 		return certificateDTO;
 	}
-	
+
 	private GiftCertificateGetForCreationDTO convertToDtoForCreationOperation(GiftCertificate giftCertificate) {
-		
+
 		if (giftCertificate.getTags() == null) {
 			giftCertificate.setTags(Collections.emptyList());
 		}
 
-		GiftCertificateGetForCreationDTO certificateDTO = modelMapper.map(giftCertificate, GiftCertificateGetForCreationDTO.class);
+		GiftCertificateGetForCreationDTO certificateDTO = modelMapper.map(giftCertificate,
+				GiftCertificateGetForCreationDTO.class);
 
 		return certificateDTO;
 	}
-	
+
 	private GiftCertificateGetForUpdateDTO convertToDtoForUpdationOperation(GiftCertificate giftCertificate) {
-		
+
 		if (giftCertificate.getTags() == null) {
 			giftCertificate.setTags(Collections.emptyList());
 		}
 
-		GiftCertificateGetForUpdateDTO certificateDTO = modelMapper.map(giftCertificate, GiftCertificateGetForUpdateDTO.class);
+		GiftCertificateGetForUpdateDTO certificateDTO = modelMapper.map(giftCertificate,
+				GiftCertificateGetForUpdateDTO.class);
 
 		return certificateDTO;
 	}

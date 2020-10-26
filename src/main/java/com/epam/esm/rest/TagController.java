@@ -45,6 +45,9 @@ public class TagController {
 		List<TagDTO> tags = new ArrayList<TagDTO>();
 		try {
 			tags = tagService.getTags();
+			if (tags.isEmpty()) {
+				throw new NotFoundException("Nothing was found by the request");
+			}
 		} catch (ServiceException e) {
 			log.log(Level.ERROR, "Error when calling GetMapping command getTags() from the RestController", e);
 			throw new NotFoundException("Nothing was found by the request", e);

@@ -10,14 +10,26 @@ import com.epam.esm.service.exception.ServiceException;
 
 public interface CertificateService {
 
-	public List<GiftCertificateGetDTO> getCertificates() throws ServiceException;
+	List<GiftCertificateGetDTO> getCertificates() throws ServiceException;
+
+	GiftCertificateGetDTO getCertificate(long theId);
+
+	GiftCertificateGetForCreationDTO saveCertificate(GiftCertificateCreateUpdateDTO theCertificate)
+			throws ServiceException;
+
+	GiftCertificateGetForUpdateDTO updateCertificate(GiftCertificateCreateUpdateDTO theCertificate)
+			throws ServiceException;
+
+	void deleteCertificate(long theId) throws ServiceException;
+
+	List<GiftCertificateGetDTO> getCertificatesByTagName(String tagName) throws ServiceException;
+
+	List<GiftCertificateGetDTO> getCertificatesByPartOfName(String nameContains)
+			throws ServiceException;
 	
-	public GiftCertificateGetDTO getCertificate(long theId);
+	List<GiftCertificateGetDTO> getCertificatesByDescription(String description)
+			throws ServiceException;
 
-	public GiftCertificateGetForCreationDTO saveCertificate(GiftCertificateCreateUpdateDTO theCertificate) throws ServiceException;
-
-	public GiftCertificateGetForUpdateDTO updateCertificate(GiftCertificateCreateUpdateDTO theCertificate) throws ServiceException;
-
-	public void deleteCertificate(long theId) throws ServiceException;
+	List<GiftCertificateGetDTO> getCertificatesSorted(String sortBy, String sortDirection) throws ServiceException;
 
 }

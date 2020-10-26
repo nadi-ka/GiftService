@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.epam.esm.dto.GiftCertificateCreateUpdateDTO;
@@ -45,6 +47,9 @@ public class CertificateController {
 		List<GiftCertificateGetDTO> certificates;
 		try {
 			certificates = certificateService.getCertificates();
+			if (certificates.isEmpty()) {
+				throw new NotFoundException("Nothing was found by the request");
+			}
 		} catch (ServiceException e) {
 			log.log(Level.ERROR,
 					"Error when calling GetMapping command getCertificates() from the CertificateController", e);
@@ -110,8 +115,8 @@ public class CertificateController {
 	}
 
 	/**
-	 * DELETE certificate by long Id; In case when the certificate with the given Id is not found,
-	 * the method returns Status Code = 200 OK 
+	 * DELETE certificate by long Id; In case when the certificate with the given Id
+	 * is not found, the method returns Status Code = 200 OK
 	 */
 	@DeleteMapping("/certificates/{certificateId}")
 	public ResponseEntity<?> deleteCertificate(@PathVariable long certificateId) {
@@ -132,6 +137,56 @@ public class CertificateController {
 		}
 		return ResponseEntity.status(HttpStatus.OK)
 				.body("The certificate was successfully deleted, id - " + certificateId);
+	}
+
+	@GetMapping(value = "/certificates", params = { "tagName", "nameContains", "description" })
+	public @ResponseBody List<GiftCertificateGetDTO> getCertificatesFiltered(
+			@RequestParam(required = false) String tagName, @RequestParam(required = false) String nameContains,
+			@RequestParam(required = false) String description) {
+
+		List<GiftCertificateGetDTO> certificates;
+
+		try {
+			if (!tagName.isEmpty()) {
+				certificates = certificateService.getCertificatesByTagName(tagName);
+			} else if (!nameContains .isEmpty()) {
+				certificates = certificateService.getCertificatesByPartOfName(nameContains);
+			} else if (!description.isEmpty()) {
+				certificates = certificateService.getCertificatesByDescription(description);
+			} else {
+				certificates = certificateService.getCertificates();
+			}
+		} catch (ServiceException e) {
+			log.log(Level.ERROR,
+					"Error when calling command getCertificates(@RequestParam String tagName) from the CertificateController",
+					e);
+			throw new NotFoundException("Nothing was found by the request", e);
+		}
+		if (certificates.isEmpty()) {
+			throw new NotFoundException("Nothing was found by the request");
+		}
+		return certificates;
+	}
+
+	@GetMapping(value = "/certificates", params = { "sortBy", "sortDirection" })
+	public @ResponseBody List<GiftCertificateGetDTO> getCertificatesSorted(@RequestParam String sortBy,
+			@RequestParam String sortDirection) {
+
+		List<GiftCertificateGetDTO> certificates;
+
+		try {
+			certificates = certificateService.getCertificatesSorted(sortBy, sortDirection);
+
+			if (certificates.isEmpty()) {
+				throw new NotFoundException("Nothing was found by the request");
+			}
+		} catch (ServiceException e) {
+			log.log(Level.ERROR,
+					"Error when calling command getCertificates(@RequestParam String sortBy, @RequestParam String sortDirection) from the CertificateController",
+					e);
+			throw new NotFoundException("Nothing was found by the request", e);
+		}
+		return certificates;
 	}
 
 }

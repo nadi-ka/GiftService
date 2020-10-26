@@ -5,7 +5,9 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.jdbc.core.RowMapper;
 
@@ -13,20 +15,17 @@ import com.epam.esm.dal.constant.ColumnNameHolder;
 import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.entity.Tag;
 
-public class TagWithCertificatesMapper implements RowMapper<Tag>{
+public class CertificateWithTagsMapper implements RowMapper<GiftCertificate> {
+	
+	Map<Long, GiftCertificate> certificateMap = new HashMap<Long, GiftCertificate>();
 
 	@Override
-	public Tag mapRow(ResultSet rs, int rowNum) throws SQLException {
+	public GiftCertificate mapRow(ResultSet rs, int rowNum) throws SQLException {
 		
-		Tag tag = new Tag();
-		List<GiftCertificate> certificates = new ArrayList<GiftCertificate>();
+		GiftCertificate certificate = certificateMap.get(rs.getLong(ColumnNameHolder.CERTIFICATE_ID));
 		
-		tag.setId(rs.getLong(ColumnNameHolder.TAG_ID));
-		tag.setName(rs.getString(ColumnNameHolder.TAG_NAME));
-		
-		while (rs.next()) {
-			GiftCertificate certificate = new GiftCertificate();
-			
+		if (certificate == null) {
+			certificate = new GiftCertificate();
 			certificate.setId(rs.getLong(ColumnNameHolder.CERTIFICATE_ID));
 			certificate.setName(rs.getString(ColumnNameHolder.CERTIFICATE_NAME));
 			certificate.setDescription(rs.getString(ColumnNameHolder.CERTIFICATE_DESCRIPTION));
@@ -36,14 +35,20 @@ public class TagWithCertificatesMapper implements RowMapper<Tag>{
 			LocalDateTime lastUpdateDateTime = ((lastUpdateDate == null) ? null : lastUpdateDate.toLocalDateTime());
 			certificate.setLastUpdateDate(lastUpdateDateTime);
 			certificate.setDuration(rs.getInt(ColumnNameHolder.CERTIFICATE_DURATION));
-
-			certificates.add(certificate);
-			certificate = null;
+			certificate.setTags(new ArrayList<Tag>());
 			
+			certificateMap.put(rs.getLong(ColumnNameHolder.CERTIFICATE_ID), certificate);
 		}
-		tag.setCertificates(certificates);
+	
+		long tagId = rs.getLong(ColumnNameHolder.TAG_ID);
+		String tagName = rs.getString(ColumnNameHolder.TAG_NAME);
+		Tag tag = new Tag(tagId, tagName);
 		
-		return tag;
+		List<Tag> currentCertificateTagList = certificateMap.get(rs.getLong(ColumnNameHolder.CERTIFICATE_ID)).getTags();
+		currentCertificateTagList.add(tag);
+		certificate.setTags(currentCertificateTagList);
+
+		return certificate;
 	}
 
 }

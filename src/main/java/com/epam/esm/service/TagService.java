@@ -7,7 +7,7 @@ import com.epam.esm.service.exception.ServiceException;
 
 public interface TagService {
 	
-	List<TagDTO> getTags() throws ServiceException;
+	List<TagDTO> getTags();
 	
 	TagDTO getTag(long theId);
 

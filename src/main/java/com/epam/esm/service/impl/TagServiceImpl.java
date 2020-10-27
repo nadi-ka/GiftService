@@ -1,6 +1,5 @@
 package com.epam.esm.service.impl;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -30,15 +29,11 @@ public class TagServiceImpl implements TagService {
 	private ModelMapper modelMapper;
 
 	@Override
-	public List<TagDTO> getTags() throws ServiceException {
+	public List<TagDTO> getTags() {
 
 		List<Tag> tags;
-		try {
-			tags = tagDao.findAllTags();
+		tags = tagDao.findAllTags();
 
-		} catch (DaoException e) {
-			throw new ServiceException("Exception when calling getTags() from TagServiceImpl", e);
-		}
 		return tags.stream().map(this::convertToDto).collect(Collectors.toList());
 	}
 
@@ -91,11 +86,11 @@ public class TagServiceImpl implements TagService {
 		// if the method returns cartificateId - the operation will be forbidden;
 		// if the method returns cartificateId=0, the tag could be deleted;
 		long certificateId = tagDao.findCertificateIdByTagId(theId);
-		
+
 		if (certificateId != 0) {
 			throw new IllegalOperationServiceException(
 					"The tag is bounded with one or more certififcates and coudn't be deleted, tagId - " + theId);
-		}	
+		}
 		try {
 			affectedRows = tagDao.deleteTag(theId);
 		} catch (DaoException e) {
@@ -107,10 +102,6 @@ public class TagServiceImpl implements TagService {
 	}
 
 	private TagDTO convertToDto(Tag tag) {
-
-		if (tag.getCertificates() == null) {
-			tag.setCertificates(Collections.emptyList());
-		}
 
 		TagDTO tagDTO = modelMapper.map(tag, TagDTO.class);
 

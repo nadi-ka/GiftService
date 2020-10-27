@@ -2,7 +2,6 @@ package com.epam.esm.dto;
 
 import java.util.List;
 
-import com.epam.esm.entity.Tag;
 
 public class GiftCertificateCreateUpdateDTO {
 	
@@ -11,7 +10,7 @@ public class GiftCertificateCreateUpdateDTO {
 	private String description;
 	private double price;
 	private int duration;
-	private List<Tag> tags;
+	private List<TagDTO> tags;
 
 	public long getId() {
 		return id;
@@ -53,11 +52,11 @@ public class GiftCertificateCreateUpdateDTO {
 		this.duration = duration;
 	}
 
-	public List<Tag> getTags() {
+	public List<TagDTO> getTags() {
 		return tags;
 	}
 
-	public void setTags(List<Tag> tags) {
+	public void setTags(List<TagDTO> tags) {
 		this.tags = tags;
 	}
 

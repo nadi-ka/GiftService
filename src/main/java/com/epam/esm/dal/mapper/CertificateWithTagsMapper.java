@@ -9,6 +9,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.jdbc.core.RowMapper;
 
 import com.epam.esm.dal.constant.ColumnNameHolder;
@@ -16,6 +18,8 @@ import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.entity.Tag;
 
 public class CertificateWithTagsMapper implements RowMapper<GiftCertificate> {
+	
+	private static final Logger log = LogManager.getLogger(CertificateWithTagsMapper.class);
 	
 	Map<Long, GiftCertificate> certificateMap = new HashMap<Long, GiftCertificate>();
 
@@ -47,6 +51,9 @@ public class CertificateWithTagsMapper implements RowMapper<GiftCertificate> {
 		List<Tag> currentCertificateTagList = certificateMap.get(rs.getLong(ColumnNameHolder.CERTIFICATE_ID)).getTags();
 		currentCertificateTagList.add(tag);
 		certificate.setTags(currentCertificateTagList);
+		
+		log.info("########################CERT_NUM: " + rowNum + ": " + certificate);
+		log.info("########################Map_NUM: " + rowNum + ": " + certificateMap);
 
 		return certificate;
 	}

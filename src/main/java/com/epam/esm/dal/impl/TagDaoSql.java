@@ -10,6 +10,7 @@ import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementCreator;
@@ -21,7 +22,6 @@ import org.springframework.stereotype.Repository;
 import com.epam.esm.dal.TagDao;
 import com.epam.esm.dal.constant.ColumnNameHolder;
 import com.epam.esm.dal.exception.DaoException;
-import com.epam.esm.dal.pool_source.PoolSource;
 import com.epam.esm.entity.Tag;
 
 @Repository
@@ -38,9 +38,14 @@ public class TagDaoSql implements TagDao {
 
 	private static final Logger log = LogManager.getLogger(TagDaoSql.class);
 
-	public TagDaoSql(PoolSource poolSource) {
-		this.jdbcTemplate = new JdbcTemplate(poolSource.getDataSource());
-
+//	public TagDaoSql(PoolSource poolSource) {
+//		this.jdbcTemplate = new JdbcTemplate(poolSource.getDataSource());
+//
+//	}
+	
+	@Autowired
+	public  TagDaoSql(JdbcTemplate jdbcTemplate) {
+		this.jdbcTemplate = jdbcTemplate;
 	}
 
 	@Override
@@ -83,13 +88,14 @@ public class TagDaoSql implements TagDao {
 	}
 
 	@Override
-	public List<Tag> findAllTags() throws DaoException {
+	public List<Tag> findAllTags() {
 
 		List<Tag> tags = new ArrayList<Tag>();
 		try {
 			tags = jdbcTemplate.query(sqlFindAllTags, ROW_MAPPER);
 		} catch (DataAccessException e) {
-			throw new DaoException("Exception when calling findAllTags() from TagDaoSql", e);
+			// nothing was found by the request
+			return tags;
 		}
 		return tags;
 	}

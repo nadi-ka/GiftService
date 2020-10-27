@@ -42,22 +42,17 @@ public class TagController {
 	@GetMapping("/tags")
 	public List<TagDTO> getTags() {
 
-		List<TagDTO> tags = new ArrayList<TagDTO>();
-		try {
-			tags = tagService.getTags();
-			if (tags.isEmpty()) {
-				throw new NotFoundException("Nothing was found by the request");
-			}
-		} catch (ServiceException e) {
-			log.log(Level.ERROR, "Error when calling GetMapping command getTags() from the RestController", e);
-			throw new NotFoundException("Nothing was found by the request", e);
+		List<TagDTO> tags = tagService.getTags();
+
+		if (tags.isEmpty()) {
+			throw new NotFoundException("Nothing was found by the request");
 		}
 		return tags;
 	}
 
 	/**
-	 * GET tag by the long Id; In case when the tag with the given Id is not found, the
-	 * method returns Status Code = 404
+	 * GET tag by the long Id; In case when the tag with the given Id is not found,
+	 * the method returns Status Code = 404
 	 */
 	@GetMapping("/tags/{tagId}")
 	public TagDTO getTag(@PathVariable long tagId) {
@@ -102,9 +97,7 @@ public class TagController {
 			log.log(Level.ERROR, "Error when calling PutMapping command updateTag() from the RestController", e);
 			throw new NotSavedException("The tag wasn't updated", e);
 		}
-		if (theTag.getCertificates() == null) {
-			theTag.setCertificates(Collections.emptyList());
-		}
+		
 		return theTag;
 	}
 

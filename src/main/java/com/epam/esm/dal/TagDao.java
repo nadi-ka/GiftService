@@ -11,7 +11,7 @@ public interface TagDao {
 	
 	int updateTag(Tag tag) throws DaoException;
 	
-	List<Tag> findAllTags() throws DaoException;
+	List<Tag> findAllTags();
 	
 	Tag findTag(long id);
 

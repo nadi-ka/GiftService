@@ -1,5 +1,6 @@
 package com.epam.esm.rest;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.logging.log4j.Level;
@@ -21,8 +22,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.epam.esm.dto.GiftCertificateCreateUpdateDTO;
 import com.epam.esm.dto.GiftCertificateGetDTO;
-import com.epam.esm.dto.GiftCertificateGetForCreationDTO;
-import com.epam.esm.dto.GiftCertificateGetForUpdateDTO;
 import com.epam.esm.rest.exception.NotFoundException;
 import com.epam.esm.rest.exception.NotSavedException;
 import com.epam.esm.service.CertificateService;
@@ -36,27 +35,6 @@ public class CertificateController {
 	private CertificateService certificateService;
 
 	private static final Logger log = LogManager.getLogger(CertificateController.class);
-
-	/**
-	 * GET method, which returns the List, which contains all certificates from the
-	 * Database;
-	 */
-	@GetMapping("/certificates")
-	public List<GiftCertificateGetDTO> getCertificates() {
-
-		List<GiftCertificateGetDTO> certificates;
-		try {
-			certificates = certificateService.getCertificates();
-			if (certificates.isEmpty()) {
-				throw new NotFoundException("Nothing was found by the request");
-			}
-		} catch (ServiceException e) {
-			log.log(Level.ERROR,
-					"Error when calling GetMapping command getCertificates() from the CertificateController", e);
-			throw new NotFoundException("Nothing was found by the request", e);
-		}
-		return certificates;
-	}
 
 	/**
 	 * GET certificate by the long Id; In case when the certificate with the given
@@ -82,9 +60,9 @@ public class CertificateController {
 	 * with
 	 */
 	@PostMapping("/certificates")
-	public GiftCertificateGetForCreationDTO addCertificate(@RequestBody GiftCertificateCreateUpdateDTO theCertificate) {
+	public GiftCertificateGetDTO addCertificate(@RequestBody GiftCertificateCreateUpdateDTO theCertificate) {
 
-		GiftCertificateGetForCreationDTO certificateGetDTO;
+		GiftCertificateGetDTO certificateGetDTO;
 		try {
 			certificateGetDTO = certificateService.saveCertificate(theCertificate);
 		} catch (ServiceException e) {
@@ -101,9 +79,10 @@ public class CertificateController {
 	 * Status Code = 200
 	 */
 	@PutMapping("/certificates")
-	public GiftCertificateGetForUpdateDTO updateTag(@RequestBody GiftCertificateCreateUpdateDTO theCertificate) {
+	public GiftCertificateGetDTO updateCertificate(
+			@RequestBody GiftCertificateCreateUpdateDTO theCertificate) {
 
-		GiftCertificateGetForUpdateDTO certificateDTO;
+		GiftCertificateGetDTO certificateDTO;
 		try {
 			certificateDTO = certificateService.updateCertificate(theCertificate);
 		} catch (ServiceException e) {
@@ -139,52 +118,38 @@ public class CertificateController {
 				.body("The certificate was successfully deleted, id - " + certificateId);
 	}
 
-	@GetMapping(value = "/certificates", params = { "tagName", "nameContains", "description" })
+	/**
+	 * GET method, which returns the List of GiftCertificates; accepts optional
+	 * parameters tagName, nameContains, description, sortBy; parameters tagName,
+	 * nameContains, description could be used in conjunction with sortBy (date_asc,
+	 * date_desc, name_asc, name_desc) parameter;
+	 * 
+	 */
+	@GetMapping("/certificates")
 	public @ResponseBody List<GiftCertificateGetDTO> getCertificatesFiltered(
 			@RequestParam(required = false) String tagName, @RequestParam(required = false) String nameContains,
-			@RequestParam(required = false) String description) {
+			@RequestParam(required = false) String description, @RequestParam(required = false) String sortBy) {
 
-		List<GiftCertificateGetDTO> certificates;
+		List<GiftCertificateGetDTO> certificates = new ArrayList<GiftCertificateGetDTO>();
 
-		try {
-			if (!tagName.isEmpty()) {
-				certificates = certificateService.getCertificatesByTagName(tagName);
-			} else if (!nameContains .isEmpty()) {
-				certificates = certificateService.getCertificatesByPartOfName(nameContains);
-			} else if (!description.isEmpty()) {
-				certificates = certificateService.getCertificatesByDescription(description);
-			} else {
-				certificates = certificateService.getCertificates();
-			}
-		} catch (ServiceException e) {
-			log.log(Level.ERROR,
-					"Error when calling command getCertificates(@RequestParam String tagName) from the CertificateController",
-					e);
-			throw new NotFoundException("Nothing was found by the request", e);
+		if (tagName != null && !tagName.isEmpty()) {
+			certificates = certificateService.getCertificatesByTagName(tagName);
+		} else if (nameContains != null && !nameContains.isEmpty()) {
+			certificates = certificateService.getCertificatesByPartOfName(nameContains);
+		} else if (description != null && !description.isEmpty()) {
+			certificates = certificateService.getCertificatesByDescription(description);
+		} else {
+			certificates = certificateService.getCertificates();
 		}
+
+		// if parameter for sorting is indicated - certificates'll be sorted in given order;
+		if (sortBy != null && !sortBy.isEmpty()) {
+			certificates = certificateService.sortCertificate(certificates, sortBy);
+		}
+
+		// if Empty List was returned - exception is handled as 404NotFound;
 		if (certificates.isEmpty()) {
 			throw new NotFoundException("Nothing was found by the request");
-		}
-		return certificates;
-	}
-
-	@GetMapping(value = "/certificates", params = { "sortBy", "sortDirection" })
-	public @ResponseBody List<GiftCertificateGetDTO> getCertificatesSorted(@RequestParam String sortBy,
-			@RequestParam String sortDirection) {
-
-		List<GiftCertificateGetDTO> certificates;
-
-		try {
-			certificates = certificateService.getCertificatesSorted(sortBy, sortDirection);
-
-			if (certificates.isEmpty()) {
-				throw new NotFoundException("Nothing was found by the request");
-			}
-		} catch (ServiceException e) {
-			log.log(Level.ERROR,
-					"Error when calling command getCertificates(@RequestParam String sortBy, @RequestParam String sortDirection) from the CertificateController",
-					e);
-			throw new NotFoundException("Nothing was found by the request", e);
 		}
 		return certificates;
 	}

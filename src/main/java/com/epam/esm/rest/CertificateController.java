@@ -3,14 +3,22 @@ package com.epam.esm.rest;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.validation.Valid;
+
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.propertyeditors.StringTrimmerEditor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.InitBinder;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -24,6 +32,9 @@ import com.epam.esm.dto.GiftCertificateCreateUpdateDTO;
 import com.epam.esm.dto.GiftCertificateGetDTO;
 import com.epam.esm.rest.exception.NotFoundException;
 import com.epam.esm.rest.exception.NotSavedException;
+import com.epam.esm.rest.parameter.FilterParam;
+import com.epam.esm.rest.parameter.OrderParam;
+import com.epam.esm.rest.parameter.ParameterConstant;
 import com.epam.esm.service.CertificateService;
 import com.epam.esm.service.exception.ServiceException;
 
@@ -60,16 +71,12 @@ public class CertificateController {
 	 * with
 	 */
 	@PostMapping("/certificates")
-	public GiftCertificateGetDTO addCertificate(@RequestBody GiftCertificateCreateUpdateDTO theCertificate) {
+	public GiftCertificateGetDTO addCertificate(
+			@Valid @ModelAttribute("giftCertificateCreateUpdateDTO") @RequestBody GiftCertificateCreateUpdateDTO theCertificate,
+			BindingResult theBindingResult) {
 
-		GiftCertificateGetDTO certificateGetDTO;
-		try {
-			certificateGetDTO = certificateService.saveCertificate(theCertificate);
-		} catch (ServiceException e) {
-			log.log(Level.ERROR,
-					"Error when calling PostMapping command addCertificate() from the CertificateController", e);
-			throw new NotSavedException("The cartificate wasn't saved", e);
-		}
+		GiftCertificateGetDTO certificateGetDTO = certificateService.saveCertificate(theCertificate);
+
 		return certificateGetDTO;
 	}
 
@@ -80,16 +87,11 @@ public class CertificateController {
 	 */
 	@PutMapping("/certificates")
 	public GiftCertificateGetDTO updateCertificate(
-			@RequestBody GiftCertificateCreateUpdateDTO theCertificate) {
+			@RequestBody @Valid @ModelAttribute("giftCertificateCreateUpdateDTO") GiftCertificateCreateUpdateDTO theCertificate,
+			BindingResult theBindingResult) {
 
-		GiftCertificateGetDTO certificateDTO;
-		try {
-			certificateDTO = certificateService.updateCertificate(theCertificate);
-		} catch (ServiceException e) {
-			log.log(Level.ERROR,
-					"Error when calling PutMapping command updateCertificate() from the CertificateController", e);
-			throw new NotSavedException("The tag wasn't updated", e);
-		}
+		GiftCertificateGetDTO certificateDTO = certificateService.updateCertificate(theCertificate);
+
 		return certificateDTO;
 	}
 
@@ -100,58 +102,63 @@ public class CertificateController {
 	@DeleteMapping("/certificates/{certificateId}")
 	public ResponseEntity<?> deleteCertificate(@PathVariable long certificateId) {
 
-		GiftCertificateGetDTO certificate;
-		try {
-			certificate = certificateService.getCertificate(certificateId);
-			if (certificate == null) {
-				return ResponseEntity.status(HttpStatus.OK)
-						.body("The certificate doesn't exist in base, id - " + certificateId);
-			}
-
-			// certificate was found and will be deleted;
-			certificateService.deleteCertificate(certificateId);
-		} catch (ServiceException e) {
-			log.log(Level.ERROR,
-					"Error when calling DaleteMapping command deleteCertificate() from the CertificateController", e);
+		// check if the certificate with given Id exists;
+		GiftCertificateGetDTO certificate = certificateService.getCertificate(certificateId);
+		if (certificate == null) {
+			return ResponseEntity.status(HttpStatus.OK)
+					.body("The certificate doesn't exist in base, id - " + certificateId);
 		}
+
+		// certificate was found and will be deleted;
+		certificateService.deleteCertificate(certificateId);
+
 		return ResponseEntity.status(HttpStatus.OK)
 				.body("The certificate was successfully deleted, id - " + certificateId);
 	}
 
 	/**
 	 * GET method, which returns the List of GiftCertificates; accepts optional
-	 * parameters tagName, nameContains, description, sortBy; parameters tagName,
-	 * nameContains, description could be used in conjunction with sortBy (date_asc,
-	 * date_desc, name_asc, name_desc) parameter;
-	 * 
+	 * parameters tag, name, description, order, direction; parameters could be used
+	 * in conjunction;
 	 */
 	@GetMapping("/certificates")
-	public @ResponseBody List<GiftCertificateGetDTO> getCertificatesFiltered(
-			@RequestParam(required = false) String tagName, @RequestParam(required = false) String nameContains,
-			@RequestParam(required = false) String description, @RequestParam(required = false) String sortBy) {
+	public @ResponseBody List<GiftCertificateGetDTO> getCertificates(@RequestParam(required = false) String tag,
+			@RequestParam(required = false) String name, @RequestParam(required = false) String description,
+			@RequestParam(required = false, defaultValue = "name") @Valid @ModelAttribute("orderParam") String order,
+			@RequestParam(required = false, defaultValue = "desc") @Valid @ModelAttribute("orderParam") String direction) {
 
 		List<GiftCertificateGetDTO> certificates = new ArrayList<GiftCertificateGetDTO>();
 
-		if (tagName != null && !tagName.isEmpty()) {
-			certificates = certificateService.getCertificatesByTagName(tagName);
-		} else if (nameContains != null && !nameContains.isEmpty()) {
-			certificates = certificateService.getCertificatesByPartOfName(nameContains);
-		} else if (description != null && !description.isEmpty()) {
-			certificates = certificateService.getCertificatesByDescription(description);
-		} else {
-			certificates = certificateService.getCertificates();
+		List<FilterParam> filterParams = new ArrayList<FilterParam>();
+		List<OrderParam> orderParams = new ArrayList<OrderParam>();
+
+		if (tag != null && !tag.isEmpty()) {
+			filterParams.add(new FilterParam(ParameterConstant.TAG, tag));
+		}
+		if (name != null && !name.isEmpty()) {
+			filterParams.add(new FilterParam(ParameterConstant.CERTIFICATE_NAME, name));
+		}
+		if (description != null && !description.isEmpty()) {
+			filterParams.add(new FilterParam(ParameterConstant.DESCRIPTION, description));
 		}
 
-		// if parameter for sorting is indicated - certificates'll be sorted in given order;
-		if (sortBy != null && !sortBy.isEmpty()) {
-			certificates = certificateService.sortCertificate(certificates, sortBy);
-		}
+		orderParams.add(new OrderParam(order, direction));
 
-		// if Empty List was returned - exception is handled as 404NotFound;
+		certificates = certificateService.getCertificates(filterParams, orderParams);
+
+		// if List is empty - exception is handled as 404NotFound;
 		if (certificates.isEmpty()) {
 			throw new NotFoundException("Nothing was found by the request");
 		}
 		return certificates;
+	}
+	
+	@InitBinder
+	public void initBinder(WebDataBinder dataBinder) {
+		
+		StringTrimmerEditor stringTrimmerEditor = new StringTrimmerEditor(true);
+		
+		dataBinder.registerCustomEditor(String.class, stringTrimmerEditor);
 	}
 
 }

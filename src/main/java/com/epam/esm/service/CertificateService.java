@@ -4,30 +4,20 @@ import java.util.List;
 
 import com.epam.esm.dto.GiftCertificateCreateUpdateDTO;
 import com.epam.esm.dto.GiftCertificateGetDTO;
+import com.epam.esm.rest.parameter.FilterParam;
+import com.epam.esm.rest.parameter.OrderParam;
 import com.epam.esm.service.exception.ServiceException;
 
 public interface CertificateService {
 
-	List<GiftCertificateGetDTO> getCertificates();
+	List<GiftCertificateGetDTO> getCertificates(List<FilterParam> filterParams, List<OrderParam> orderParams);
 
 	GiftCertificateGetDTO getCertificate(long theId);
 
-	GiftCertificateGetDTO saveCertificate(GiftCertificateCreateUpdateDTO theCertificate)
-			throws ServiceException;
+	GiftCertificateGetDTO saveCertificate(GiftCertificateCreateUpdateDTO theCertificate);
 
-	GiftCertificateGetDTO updateCertificate(GiftCertificateCreateUpdateDTO theCertificate)
-			throws ServiceException;
+	GiftCertificateGetDTO updateCertificate(GiftCertificateCreateUpdateDTO theCertificate);
 
-	void deleteCertificate(long theId) throws ServiceException;
-
-	List<GiftCertificateGetDTO> getCertificatesByTagName(String tagName);
-
-	List<GiftCertificateGetDTO> getCertificatesByPartOfName(String nameContains);
-
-	List<GiftCertificateGetDTO> getCertificatesByDescription(String description);
-
-//	List<GiftCertificateGetDTO> getCertificatesSorted(String sortBy, String sortDirection) throws ServiceException;
-	
-	List<GiftCertificateGetDTO> sortCertificate(List<GiftCertificateGetDTO> certificates, String sortBy);
+	void deleteCertificate(long theId);
 
 }

@@ -21,38 +21,31 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.epam.esm.dal.CertificateDao;
-import com.epam.esm.dal.exception.DaoException;
 import com.epam.esm.dal.mapper.CertificateMapper;
 import com.epam.esm.dal.mapper.CertificateWithTagsMapper;
 import com.epam.esm.dal.util.DuplicateResultsRemover;
+import com.epam.esm.dal.util.SqlQueryBuilder;
 import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.entity.Tag;
+import com.epam.esm.rest.parameter.FilterParam;
+import com.epam.esm.rest.parameter.OrderParam;
 
 @Repository
 public class CertificateDaoSql implements CertificateDao {
 
 	private final JdbcTemplate jdbcTemplate;
 
+	@Autowired
+	private SqlQueryBuilder sqlBuilder;
+
 	private static final Logger log = LogManager.getLogger(CertificateDaoSql.class);
 
-	private static final String sqlFindAllCertificates = "SELECT * FROM giftCertificate;";
 	private static final String sqlFindCertificateById = "SELECT * FROM giftCertificate WHERE Id = (?)";
 	private static final String sqlAddCertificate = "INSERT INTO giftCertificate (Name, Description, Price, CreateDate, LastUpdateDate, Duration) VALUES (?,?,?,?,?,?);";
 	private static final String sqlInsertIntoM2M = "INSERT INTO `tag-certificate` VALUES (?,?);";
 	private static final String sqlUpdateCertificate = "Update giftCertificate set Name = (?), Description = (?), Price = (?), LastUpdateDate = (?), Duration = (?) where Id = (?);";
 	private static final String sqlDeleteCertificateById = "DELETE FROM giftCertificate WHERE Id = (?);";
 	private static final String sqlDeleteFromM2M = "DELETE FROM `tag-certificate` WHERE IdCertificate = (?);";
-	private static final String sqlFindCertificatesByTagName = "SELECT giftcertificate.id, giftcertificate.name, description, price, createDate, lastUpdateDate, duration, tag.id, tag.name FROM giftcertificate JOIN `tag-certificate` ON giftcertificate.id = `tag-certificate`.idCertificate JOIN tag ON tag.id = `tag-certificate`.idTag WHERE tag.name = (?);";
-	private static final String sqlSortCertificatesByCreationDateASC = "SELECT giftcertificate.id, giftcertificate.name, description, price, createDate, lastUpdateDate, duration, tag.id, tag.name FROM giftcertificate JOIN `tag-certificate` ON giftcertificate.id = `tag-certificate`.idCertificate JOIN tag ON tag.id = `tag-certificate`.idTag ORDER BY createDate;";
-	private static final String sqlSortCertificatesByCreationDateDESC = "SELECT giftcertificate.id, giftcertificate.name, description, price, createDate, lastUpdateDate, duration, tag.id, tag.name FROM giftcertificate JOIN `tag-certificate` ON giftcertificate.id = `tag-certificate`.idCertificate JOIN tag ON tag.id = `tag-certificate`.idTag ORDER BY createDate DESC;";
-	private static final String sqlSortCertificatesByNameASC = "SELECT giftcertificate.id, giftcertificate.name, description, price, createDate, lastUpdateDate, duration, tag.id, tag.name FROM giftcertificate JOIN `tag-certificate` ON giftcertificate.id = `tag-certificate`.idCertificate JOIN tag ON tag.id = `tag-certificate`.idTag ORDER BY giftcertificate.name;";
-	private static final String sqlSortCertificatesByNameDESC = "SELECT giftcertificate.id, giftcertificate.name, description, price, createDate, lastUpdateDate, duration, tag.id, tag.name FROM giftcertificate JOIN `tag-certificate` ON giftcertificate.id = `tag-certificate`.idCertificate JOIN tag ON tag.id = `tag-certificate`.idTag ORDER BY giftcertificate.name DESC;";
-	private static final String sqlFindCertificatesByPartOfName = "SELECT giftcertificate.id, giftcertificate.name, description, price, createDate, lastUpdateDate, duration, tag.id, tag.name FROM giftcertificate JOIN `tag-certificate` ON giftcertificate.id = `tag-certificate`.idCertificate JOIN tag ON tag.id = `tag-certificate`.idTag WHERE giftcertificate.name like (?);";
-	private static final String sqlFindCertificatesByDescription = "SELECT giftcertificate.id, giftcertificate.name, description, price, createDate, lastUpdateDate, duration, tag.id, tag.name FROM giftcertificate JOIN `tag-certificate` ON giftcertificate.id = `tag-certificate`.idCertificate JOIN tag ON tag.id = `tag-certificate`.idTag WHERE description like (?);";
-
-	private static final String sortDirectionASC = "asc";
-	private static final String sortDirectionDESC = "desc";
-	private static final String percentSign = "%";
 
 	@Autowired
 	public CertificateDaoSql(JdbcTemplate jdbcTemplate) {
@@ -61,79 +54,64 @@ public class CertificateDaoSql implements CertificateDao {
 
 	@Transactional
 	@Override
-	public GiftCertificate addCertificate(GiftCertificate certificate) throws DaoException {
+	public GiftCertificate addCertificate(GiftCertificate certificate) {
 
 		LocalDateTime lastUpdateDate = certificate.getLastUpdateDate();
 		Timestamp lastUpdateTimestamp = ((lastUpdateDate == null) ? null : Timestamp.valueOf(lastUpdateDate));
 
 		KeyHolder keyHolder = new GeneratedKeyHolder();
 
-		try {
+		// add certificate to the DB table and return generated id;
+		jdbcTemplate.update(new PreparedStatementCreator() {
 
-			// add certificate to the DB table and return generated id;
-			jdbcTemplate.update(new PreparedStatementCreator() {
+			@Override
+			public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
 
-				@Override
-				public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
+				String paramToReturn = "Id";
 
-					PreparedStatement preparedStatement = con.prepareStatement(sqlAddCertificate,
-							new String[] { "Id" });
-					preparedStatement.setString(1, certificate.getName());
-					preparedStatement.setString(2, certificate.getDescription());
-					preparedStatement.setDouble(3, certificate.getPrice());
-					preparedStatement.setTimestamp(4, Timestamp.valueOf(certificate.getCreationDate()));
-					preparedStatement.setTimestamp(5, lastUpdateTimestamp);
-					preparedStatement.setLong(6, certificate.getDuration());
+				PreparedStatement preparedStatement = con.prepareStatement(sqlAddCertificate,
+						new String[] { paramToReturn });
+				preparedStatement.setString(1, certificate.getName());
+				preparedStatement.setString(2, certificate.getDescription());
+				preparedStatement.setDouble(3, certificate.getPrice());
+				preparedStatement.setTimestamp(4, Timestamp.valueOf(certificate.getCreationDate()));
+				preparedStatement.setTimestamp(5, lastUpdateTimestamp);
+				preparedStatement.setLong(6, certificate.getDuration());
 
-					return preparedStatement;
-				}
-			}, keyHolder);
-
-			long newSertificateId = keyHolder.getKey().longValue();
-			certificate.setId(newSertificateId);
-
-			// add tagId and certificateId to the M2M table;
-
-			for (Tag tag : certificate.getTags()) {
-				int insertedRowM2M = jdbcTemplate.update(sqlInsertIntoM2M, tag.getId(), newSertificateId);
-
-				// (insertedRowM2M == 0) means that the data wasn't added to the table;
-
-				if (insertedRowM2M == 0) {
-					throw new DaoException(
-							"Exception when inserting data into the table `tag-certificate`, the data wasn't added");
-				}
+				return preparedStatement;
 			}
+		}, keyHolder);
 
-		} catch (DataAccessException e) {
-			throw new DaoException("Exception when call addCertificate() from CertificateDaoSql", e);
+		long newSertificateId = keyHolder.getKey().longValue();
+		certificate.setId(newSertificateId);
+
+		// add tagId and certificateId to the M2M table;
+		for (Tag tag : certificate.getTags()) {
+			jdbcTemplate.update(sqlInsertIntoM2M, tag.getId(), newSertificateId);
 		}
 		return certificate;
 	}
 
 	@Override
-	public GiftCertificate updateCertificate(GiftCertificate certificate) throws DaoException {
+	public GiftCertificate updateCertificate(GiftCertificate certificate) {
 
-		int affectedRows = 0;
-		try {
-			affectedRows = jdbcTemplate.update(sqlUpdateCertificate, certificate.getName(),
-					certificate.getDescription(), certificate.getPrice(), certificate.getLastUpdateDate(),
-					certificate.getDuration(), certificate.getId());
-		} catch (DataAccessException e) {
-			throw new DaoException("Exception when call updateCertificate() from CertificateDaoSql", e);
-		}
-		if (affectedRows == 0) {
-			throw new DaoException("The certificate wasn't updated");
-		}
+		jdbcTemplate.update(sqlUpdateCertificate, certificate.getName(), certificate.getDescription(),
+				certificate.getPrice(), certificate.getLastUpdateDate(), certificate.getDuration(),
+				certificate.getId());
+
 		return certificate;
 	}
 
 	@Override
-	public List<GiftCertificate> findAllCertificates() {
+	public List<GiftCertificate> findCertificates(List<FilterParam> filterParams, List<OrderParam> orderParams) {
 
 		List<GiftCertificate> certificates = new ArrayList<GiftCertificate>();
+		String sqlQuery = sqlBuilder.buildFindCertificatesQuery(filterParams, orderParams);
+
 		try {
-			certificates = jdbcTemplate.query(sqlFindAllCertificates, new CertificateMapper());
+			certificates = jdbcTemplate.query(sqlQuery, new CertificateWithTagsMapper());
+			certificates = DuplicateResultsRemover.removeDuplicateResults(certificates);
+
 		} catch (DataAccessException e) {
 			// nothing was found by the request;
 			return certificates;
@@ -156,100 +134,15 @@ public class CertificateDaoSql implements CertificateDao {
 
 	@Transactional
 	@Override
-	public void deleteCertificate(long id) throws DaoException {
+	public void deleteCertificate(long id) {
 
-		try {
-			int[] types = { Types.BIGINT };
-			// delete the data from M2M table;
-			jdbcTemplate.update(sqlDeleteFromM2M, new Object[] { id }, types);
+		int[] types = { Types.BIGINT };
+		// delete the data from M2M table;
+		jdbcTemplate.update(sqlDeleteFromM2M, new Object[] { id }, types);
 
-			// delete the certificate from giftCetrificate table;
-			jdbcTemplate.update(sqlDeleteCertificateById, new Object[] { id }, types);
-		} catch (DataAccessException e) {
-			throw new DaoException("Exception when calling deleteCertificate() from CertificateDaoSql", e);
-		}
+		// delete the certificate from giftCetrificate table;
+		jdbcTemplate.update(sqlDeleteCertificateById, new Object[] { id }, types);
+
 	}
-
-	@Override
-	public List<GiftCertificate> findCertificatesByTagName(String tagName) {
-
-		List<GiftCertificate> certificates = new ArrayList<GiftCertificate>();
-
-		try {
-			certificates = jdbcTemplate.query(sqlFindCertificatesByTagName, new Object[] { tagName },
-					new CertificateWithTagsMapper());
-		} catch (DataAccessException e) {
-			// nothing was found by the request;
-			return certificates;
-		}
-		return certificates;
-	}
-
-	@Override
-	public List<GiftCertificate> findCertificatesByPartOfName(String nameContains) {
-
-		List<GiftCertificate> certificates = new ArrayList<GiftCertificate>();
-
-		try {
-			certificates = jdbcTemplate.query(sqlFindCertificatesByPartOfName,
-					new Object[] { percentSign + nameContains + percentSign }, new CertificateWithTagsMapper());
-
-		} catch (DataAccessException e) {
-			// nothing was found by the request;
-			return certificates;
-		}
-		return DuplicateResultsRemover.removeDuplicateResults(certificates);
-	}
-
-	@Override
-	public List<GiftCertificate> findCertificatesByDescription(String description) {
-
-		List<GiftCertificate> certificates = new ArrayList<GiftCertificate>();
-
-		try {
-			certificates = jdbcTemplate.query(sqlFindCertificatesByDescription,
-					new Object[] { percentSign + description + percentSign }, new CertificateWithTagsMapper());
-
-		} catch (DataAccessException e) {
-			// nothing was found by the request;
-			return certificates;
-		}
-		return DuplicateResultsRemover.removeDuplicateResults(certificates);
-	}
-
-//	@Override
-//	public List<GiftCertificate> sortCertificatesByDate(String sortDirection) throws DaoException {
-//
-//		List<GiftCertificate> certificates;
-//
-//		try {
-//			if (sortDirection.equals(sortDirectionASC)) {
-//				certificates = jdbcTemplate.query(sqlSortCertificatesByCreationDateASC,
-//						new CertificateWithTagsMapper());
-//				return certificates;
-//			}
-//			certificates = jdbcTemplate.query(sqlSortCertificatesByCreationDateDESC, new CertificateWithTagsMapper());
-//		} catch (DataAccessException e) {
-//			throw new DaoException("Exception when call sortCertificatesByDate() from CertificateDaoSql", e);
-//		}
-//		return certificates;
-//	}
-//
-//	@Override
-//	public List<GiftCertificate> sortCertificatesByName(String sortDirection) throws DaoException {
-//
-//		List<GiftCertificate> certificates;
-//
-//		try {
-//			if (sortDirection.equals(sortDirectionDESC)) {
-//				certificates = jdbcTemplate.query(sqlSortCertificatesByNameDESC, new CertificateWithTagsMapper());
-//				return certificates;
-//			}
-//			certificates = jdbcTemplate.query(sqlSortCertificatesByNameASC, new CertificateWithTagsMapper());
-//		} catch (DataAccessException e) {
-//			throw new DaoException("Exception when call sortCertificatesByName() from CertificateDaoSql", e);
-//		}
-//		return certificates;
-//	}
 
 }

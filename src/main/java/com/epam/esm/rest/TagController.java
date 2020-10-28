@@ -1,7 +1,5 @@
 package com.epam.esm.rest;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import org.apache.logging.log4j.Level;
@@ -21,10 +19,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.epam.esm.dto.TagDTO;
 import com.epam.esm.rest.exception.NotFoundException;
-import com.epam.esm.rest.exception.NotSavedException;
 import com.epam.esm.service.TagService;
 import com.epam.esm.service.exception.IllegalOperationServiceException;
-import com.epam.esm.service.exception.ServiceException;
 
 @RestController
 @RequestMapping("/tag-api")
@@ -73,14 +69,8 @@ public class TagController {
 	@PostMapping("/tags")
 	public TagDTO addTag(@RequestBody TagDTO theTag) {
 
-		TagDTO newTag = null;
-		try {
-			newTag = tagService.saveTag(theTag);
+		TagDTO newTag = tagService.saveTag(theTag);
 
-		} catch (ServiceException e) {
-			log.log(Level.ERROR, "Error when calling PostMapping command addTag() from the RestController", e);
-			throw new NotSavedException("The tag wasn't saved", e);
-		}
 		return newTag;
 	}
 
@@ -91,13 +81,8 @@ public class TagController {
 	@PutMapping("/tags")
 	public TagDTO updateTag(@RequestBody TagDTO theTag) {
 
-		try {
-			tagService.updateTag(theTag);
-		} catch (ServiceException e) {
-			log.log(Level.ERROR, "Error when calling PutMapping command updateTag() from the RestController", e);
-			throw new NotSavedException("The tag wasn't updated", e);
-		}
-		
+		tagService.updateTag(theTag);
+
 		return theTag;
 	}
 
@@ -109,21 +94,23 @@ public class TagController {
 	@DeleteMapping("/tags/{tagId}")
 	public ResponseEntity<?> deleteTag(@PathVariable long tagId) {
 
-		TagDTO tag;
+		// check if the tag exists;
+		TagDTO tag = tagService.getTag(tagId);
+		if (tag == null) {
+			return ResponseEntity.status(HttpStatus.OK).body("The tag doesn't exist in base, id - " + tagId);
+		}
+		// tag was found and will be deleted;
+
 		try {
-			tag = tagService.getTag(tagId);
-			if (tag == null) {
-				return ResponseEntity.status(HttpStatus.OK).body("The tag doesn't exist in base, id - " + tagId);
-			}
-			// tag was found and will be deleted;
+
 			tagService.deleteTag(tagId);
+
 		} catch (IllegalOperationServiceException e) {
 			log.log(Level.WARN,
 					"The tag couldn't be deleted as it's bounded with one or more certificates - tagId" + tagId, e);
-			return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).body(e.getMessage());
-		} catch (ServiceException e) {
-			log.log(Level.ERROR, "Error when calling DeleteMapping command deleteTag() from the RestController", e);
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
 		}
+
 		return ResponseEntity.status(HttpStatus.OK).body("The tag was successfully deleted, id - " + tagId);
 	}
 

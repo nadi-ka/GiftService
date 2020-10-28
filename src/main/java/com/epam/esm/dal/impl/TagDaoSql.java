@@ -21,7 +21,6 @@ import org.springframework.stereotype.Repository;
 
 import com.epam.esm.dal.TagDao;
 import com.epam.esm.dal.constant.ColumnNameHolder;
-import com.epam.esm.dal.exception.DaoException;
 import com.epam.esm.entity.Tag;
 
 @Repository
@@ -38,36 +37,30 @@ public class TagDaoSql implements TagDao {
 
 	private static final Logger log = LogManager.getLogger(TagDaoSql.class);
 
-//	public TagDaoSql(PoolSource poolSource) {
-//		this.jdbcTemplate = new JdbcTemplate(poolSource.getDataSource());
-//
-//	}
-	
 	@Autowired
-	public  TagDaoSql(JdbcTemplate jdbcTemplate) {
+	public TagDaoSql(JdbcTemplate jdbcTemplate) {
 		this.jdbcTemplate = jdbcTemplate;
 	}
 
 	@Override
-	public Tag addTag(Tag tag) throws DaoException {
+	public Tag addTag(Tag tag) {
 
 		KeyHolder keyHolder = new GeneratedKeyHolder();
 
-		try {
-			jdbcTemplate.update(new PreparedStatementCreator() {
+		jdbcTemplate.update(new PreparedStatementCreator() {
 
-				@Override
-				public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
+			@Override
+			public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
 
-					PreparedStatement preparedStatement = con.prepareStatement(sqlAddTag, new String[] { "Id" });
-					preparedStatement.setString(1, tag.getName());
+				String paramToReturn = "Id";
 
-					return preparedStatement;
-				}
-			}, keyHolder);
-		} catch (DataAccessException e) {
-			throw new DaoException("Exception when calling addTag() from TagDaoSql", e);
-		}
+				PreparedStatement preparedStatement = con.prepareStatement(sqlAddTag, new String[] { paramToReturn });
+				preparedStatement.setString(1, tag.getName());
+
+				return preparedStatement;
+			}
+		}, keyHolder);
+
 		long newTagId = keyHolder.getKey().longValue();
 		tag.setId(newTagId);
 
@@ -75,14 +68,12 @@ public class TagDaoSql implements TagDao {
 	}
 
 	@Override
-	public int updateTag(Tag tag) throws DaoException {
+	public int updateTag(Tag tag) {
 
 		int affectedRows = 0;
-		try {
-			affectedRows = jdbcTemplate.update(sqlUpdateTag, tag.getName(), tag.getId());
-		} catch (DataAccessException e) {
-			throw new DaoException("Exception when calling updateTag() from TagDaoSql", e);
-		}
+
+		affectedRows = jdbcTemplate.update(sqlUpdateTag, tag.getName(), tag.getId());
+
 		return affectedRows;
 
 	}
@@ -113,29 +104,27 @@ public class TagDaoSql implements TagDao {
 	}
 
 	@Override
-	public int deleteTag(long id) throws DaoException {
+	public int deleteTag(long id) {
 
 		int affectedRows = 0;
-		try {
-			int[] types = { Types.BIGINT };
-			affectedRows = jdbcTemplate.update(sqlDeleteTagById, new Object[] { id }, types);
-		} catch (DataAccessException e) {
-			throw new DaoException("Exception when calling deleteTag() from TagDaoSql", e);
-		}
+
+		int[] types = { Types.BIGINT };
+		affectedRows = jdbcTemplate.update(sqlDeleteTagById, new Object[] { id }, types);
+
 		return affectedRows;
 
 	}
-	
-	// The method is used for checking, if there is at least one certificate, 
+
+	// The method is used for checking, if there is at least one certificate,
 	// bounded with given tag's Id
-	
+
 	@Override
 	public long findCertificateIdByTagId(long tagId) {
 
 		long certificateId;
 		try {
-			certificateId = (Long) jdbcTemplate.queryForObject(
-		            sqlFindCertificateIdByTagId, new Object[] { tagId }, Long.class);
+			certificateId = (Long) jdbcTemplate.queryForObject(sqlFindCertificateIdByTagId, new Object[] { tagId },
+					Long.class);
 		} catch (DataAccessException e) {
 			certificateId = 0;
 		}

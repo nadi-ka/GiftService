@@ -4,27 +4,19 @@ import java.util.List;
 
 import com.epam.esm.dal.exception.DaoException;
 import com.epam.esm.entity.GiftCertificate;
+import com.epam.esm.rest.parameter.FilterParam;
+import com.epam.esm.rest.parameter.OrderParam;
 
 public interface CertificateDao {
 
-	GiftCertificate addCertificate(GiftCertificate certificate) throws DaoException;
+	GiftCertificate addCertificate(GiftCertificate certificate);
 
-	GiftCertificate updateCertificate(GiftCertificate certificate) throws DaoException;
+	GiftCertificate updateCertificate(GiftCertificate certificate);
 
-	List<GiftCertificate> findAllCertificates();
+	List<GiftCertificate> findCertificates(List<FilterParam> filterParams, List<OrderParam> orderParams);
 
 	GiftCertificate findCertificate(long id);
 
-	void deleteCertificate(long id) throws DaoException;
-
-	List<GiftCertificate> findCertificatesByTagName(String TagName);
-
-//	List<GiftCertificate> sortCertificatesByDate(String sortDirection) throws DaoException;
-//
-//	List<GiftCertificate> sortCertificatesByName(String sortDirection) throws DaoException;
-
-	List<GiftCertificate> findCertificatesByPartOfName(String nameContains);
-
-	List<GiftCertificate> findCertificatesByDescription(String description);
+	void deleteCertificate(long id);
 
 }

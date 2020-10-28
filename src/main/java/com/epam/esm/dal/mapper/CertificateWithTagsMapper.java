@@ -51,9 +51,6 @@ public class CertificateWithTagsMapper implements RowMapper<GiftCertificate> {
 		List<Tag> currentCertificateTagList = certificateMap.get(rs.getLong(ColumnNameHolder.CERTIFICATE_ID)).getTags();
 		currentCertificateTagList.add(tag);
 		certificate.setTags(currentCertificateTagList);
-		
-		log.info("########################CERT_NUM: " + rowNum + ": " + certificate);
-		log.info("########################Map_NUM: " + rowNum + ": " + certificateMap);
 
 		return certificate;
 	}

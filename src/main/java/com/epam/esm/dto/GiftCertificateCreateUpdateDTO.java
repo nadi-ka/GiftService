@@ -2,14 +2,39 @@ package com.epam.esm.dto;
 
 import java.util.List;
 
+import javax.validation.constraints.DecimalMax;
+import javax.validation.constraints.DecimalMin;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+
 
 public class GiftCertificateCreateUpdateDTO {
 	
 	private long id;
+	
+	@NotNull(message = "is required")
+	@NotBlank(message = "is required")
+	@Size(min = 3, max = 45, message = "must be grater or equal to 3 chars and less or equal to 45")
 	private String name;
+	
+	@NotNull(message = "is required")
+	@NotBlank(message = "is required")
+	@Size(min = 3, max = 100, message = "must be grater or equal to 3 chars and less or equal to 100")
 	private String description;
-	private double price;
-	private int duration;
+	
+	@NotNull(message = "is required")
+	@DecimalMin("0.1")
+	@DecimalMax("10000.0")
+	private Double price;
+	
+	@NotNull(message = "is required")
+	@Min(value = 1, message = "must be grater or equal to 1")
+	@Max(value = 1000, message = "must be less or equal to 1000")
+	private Integer duration;
+	
 	private List<TagDTO> tags;
 
 	public long getId() {
@@ -36,19 +61,19 @@ public class GiftCertificateCreateUpdateDTO {
 		this.description = description;
 	}
 
-	public double getPrice() {
+	public Double getPrice() {
 		return price;
 	}
 
-	public void setPrice(double price) {
+	public void setPrice(Double price) {
 		this.price = price;
 	}
 
-	public int getDuration() {
+	public Integer getDuration() {
 		return duration;
 	}
 
-	public void setDuration(int duration) {
+	public void setDuration(Integer duration) {
 		this.duration = duration;
 	}
 

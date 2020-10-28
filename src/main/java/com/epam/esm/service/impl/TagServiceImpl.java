@@ -10,12 +10,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.epam.esm.dal.TagDao;
-import com.epam.esm.dal.exception.DaoException;
 import com.epam.esm.dto.TagDTO;
 import com.epam.esm.entity.Tag;
 import com.epam.esm.service.TagService;
 import com.epam.esm.service.exception.IllegalOperationServiceException;
-import com.epam.esm.service.exception.ServiceException;
 
 @Service
 public class TagServiceImpl implements TagService {
@@ -38,16 +36,10 @@ public class TagServiceImpl implements TagService {
 	}
 
 	@Override
-	public TagDTO saveTag(TagDTO theTag) throws ServiceException {
+	public TagDTO saveTag(TagDTO theTag) {
 
-		Tag resultTag = null;
+		Tag resultTag = tagDao.addTag(convertToEntity(theTag));
 
-		try {
-			resultTag = tagDao.addTag(convertToEntity(theTag));
-
-		} catch (DaoException e) {
-			throw new ServiceException("Exception when calling saveTag() from TagServiceImpl", e);
-		}
 		return convertToDto(resultTag);
 	}
 
@@ -63,23 +55,14 @@ public class TagServiceImpl implements TagService {
 	}
 
 	@Override
-	public void updateTag(TagDTO theTag) throws ServiceException {
+	public void updateTag(TagDTO theTag) {
 
-		int affectedRows = 0;
-		try {
-			affectedRows = tagDao.updateTag(convertToEntity(theTag));
-		} catch (DaoException e) {
-			throw new ServiceException("Exception when calling updateTag() from TagServiceImpl", e);
-		}
-		if (affectedRows == 0) {
-			throw new ServiceException("The tag wasn't saved: " + theTag);
-		}
+		tagDao.updateTag(convertToEntity(theTag));
+
 	}
 
 	@Override
-	public void deleteTag(long theId) throws ServiceException {
-
-		int affectedRows = 0;
+	public void deleteTag(long theId) throws IllegalOperationServiceException {
 
 		// check if there is at least one certificate, bounded with the tag for delete
 		// operation;
@@ -91,14 +74,7 @@ public class TagServiceImpl implements TagService {
 			throw new IllegalOperationServiceException(
 					"The tag is bounded with one or more certififcates and coudn't be deleted, tagId - " + theId);
 		}
-		try {
-			affectedRows = tagDao.deleteTag(theId);
-		} catch (DaoException e) {
-			throw new ServiceException("Exception when calling deleteTag() from TagServiceImpl", e);
-		}
-		if (affectedRows == 0) {
-			throw new ServiceException("The tag wasn't deleted, tagId - " + theId);
-		}
+		tagDao.deleteTag(theId);
 	}
 
 	private TagDTO convertToDto(Tag tag) {

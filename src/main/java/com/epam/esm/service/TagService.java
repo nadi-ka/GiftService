@@ -3,7 +3,7 @@ package com.epam.esm.service;
 import java.util.List;
 
 import com.epam.esm.dto.TagDTO;
-import com.epam.esm.service.exception.ServiceException;
+import com.epam.esm.service.exception.IllegalOperationServiceException;
 
 public interface TagService {
 	
@@ -11,10 +11,10 @@ public interface TagService {
 	
 	TagDTO getTag(long theId);
 
-	TagDTO saveTag(TagDTO theTag) throws ServiceException;
+	TagDTO saveTag(TagDTO theTag);
 
-	void updateTag(TagDTO theTag) throws ServiceException;
+	void updateTag(TagDTO theTag);
 
-	void deleteTag(long theId) throws ServiceException;
+	void deleteTag(long theId) throws IllegalOperationServiceException;
 
 }

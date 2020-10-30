@@ -8,12 +8,11 @@ import javax.naming.NamingException;
 import javax.sql.DataSource;
 
 import org.modelmapper.ModelMapper;
-import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
@@ -24,21 +23,17 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 @Configuration
 @EnableWebMvc
 @ComponentScan("com.epam.esm")
-public class DemoAppConfig {
+public class SpringConfiq {
 	
-	private final ApplicationContext applicationContext;
-
-    @Autowired
-    public  DemoAppConfig(ApplicationContext applicationContext) {
-        this.applicationContext = applicationContext;
-    }
+	@Autowired
+    private Environment env;
 
     @Bean(destroyMethod = "close")
     public javax.sql.DataSource dataSource() throws NamingException{
     	
     	Context initContext = new InitialContext();
 		Context envContext = (Context) initContext.lookup("java:/comp/env");
-		DataSource dataSource = (DataSource) envContext.lookup("jdbc/mjc-giftService");   	
+		DataSource dataSource = (DataSource) envContext.lookup("jdbc/mjc-giftService");
     
         return dataSource;
     }
@@ -71,7 +66,7 @@ public class DemoAppConfig {
 	@Bean
 	public ModelMapper modelMapper() {
 		ModelMapper mapper = new ModelMapper();
-		mapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
+//		mapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
 		return mapper;
 	}
 

@@ -6,7 +6,6 @@ import com.epam.esm.dto.GiftCertificateCreateUpdateDTO;
 import com.epam.esm.dto.GiftCertificateGetDTO;
 import com.epam.esm.rest.parameter.FilterParam;
 import com.epam.esm.rest.parameter.OrderParam;
-import com.epam.esm.service.exception.ServiceException;
 
 public interface CertificateService {
 
@@ -18,6 +17,6 @@ public interface CertificateService {
 
 	GiftCertificateGetDTO updateCertificate(GiftCertificateCreateUpdateDTO theCertificate);
 
-	void deleteCertificate(long theId);
+	int[] deleteCertificate(long theId);
 
 }

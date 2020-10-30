@@ -80,6 +80,12 @@ public class TagController {
 	 */
 	@PutMapping("/tags")
 	public TagDTO updateTag(@RequestBody TagDTO theTag) {
+		
+		// check if the tag exists;
+				TagDTO tag = tagService.getTag(theTag.getId());
+				if (tag == null) {
+					throw new NotFoundException("The tag with given Id wasn't found and can't be updated");
+				}
 
 		tagService.updateTag(theTag);
 

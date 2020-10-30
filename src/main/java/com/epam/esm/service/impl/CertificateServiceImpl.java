@@ -31,6 +31,13 @@ public class CertificateServiceImpl implements CertificateService {
 
 	private static final Logger log = LogManager.getLogger(CertificateServiceImpl.class);
 
+	public CertificateServiceImpl() {
+	}
+
+	public CertificateServiceImpl(ModelMapper modelMapper) {
+		this.modelMapper = modelMapper;
+	}
+
 	@Override
 	public List<GiftCertificateGetDTO> getCertificates(List<FilterParam> filterParams, List<OrderParam> orderParams) {
 
@@ -61,9 +68,7 @@ public class CertificateServiceImpl implements CertificateService {
 		certificateToAdd.setCreationDate(creationTime);
 		certificateToAdd.setLastUpdateDate(creationTime);
 
-		GiftCertificate addedCertificate;
-
-		addedCertificate = certificateDao.addCertificate(certificateToAdd);
+		GiftCertificate addedCertificate = certificateDao.addCertificate(certificateToAdd);
 
 		return convertToDto(addedCertificate);
 	}
@@ -76,17 +81,21 @@ public class CertificateServiceImpl implements CertificateService {
 		// set LastUpdateDate and Time(now) and format in accordance with ISO-8601
 		certificateToUpdate.setLastUpdateDate(DateTimeFormatterISO.createAndformatDateTime());
 
-		GiftCertificate updatedCertificate;
-		updatedCertificate = certificateDao.updateCertificate(certificateToUpdate);
+		GiftCertificate updatedCertificate = certificateDao.updateCertificate(certificateToUpdate);
+
+		if (updatedCertificate == null) {
+			return null;
+		}
 
 		return convertToDto(updatedCertificate);
 	}
 
 	@Override
-	public void deleteCertificate(long theId) {
+	public int[] deleteCertificate(long theId) {
 
-		certificateDao.deleteCertificate(theId);
+		int[] affectedRows = certificateDao.deleteCertificate(theId);
 
+		return affectedRows;
 	}
 
 	private GiftCertificateGetDTO convertToDto(GiftCertificate giftCertificate) {

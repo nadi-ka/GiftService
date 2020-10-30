@@ -91,6 +91,9 @@ public class CertificateController {
 			BindingResult theBindingResult) {
 
 		GiftCertificateGetDTO certificateDTO = certificateService.updateCertificate(theCertificate);
+		if (certificateDTO == null) {
+			throw new NotFoundException("The certificate with given Id wasn't found;");
+		}
 
 		return certificateDTO;
 	}
@@ -124,7 +127,7 @@ public class CertificateController {
 	@GetMapping("/certificates")
 	public @ResponseBody List<GiftCertificateGetDTO> getCertificates(@RequestParam(required = false) String tag,
 			@RequestParam(required = false) String name, @RequestParam(required = false) String description,
-			@RequestParam(required = false, defaultValue = "name") @Valid @ModelAttribute("orderParam") String order,
+			@RequestParam(required = false, defaultValue = "name")  @ModelAttribute("orderParam") String order,
 			@RequestParam(required = false, defaultValue = "desc") @Valid @ModelAttribute("orderParam") String direction) {
 
 		List<GiftCertificateGetDTO> certificates = new ArrayList<GiftCertificateGetDTO>();

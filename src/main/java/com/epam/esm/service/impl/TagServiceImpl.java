@@ -25,6 +25,12 @@ public class TagServiceImpl implements TagService {
 
 	@Autowired
 	private ModelMapper modelMapper;
+	
+	public  TagServiceImpl() {}
+	
+	public TagServiceImpl(ModelMapper modelMapper) {
+		this.modelMapper = modelMapper;
+	}
 
 	@Override
 	public List<TagDTO> getTags() {
@@ -55,14 +61,16 @@ public class TagServiceImpl implements TagService {
 	}
 
 	@Override
-	public void updateTag(TagDTO theTag) {
+	public int updateTag(TagDTO theTag) {
 
-		tagDao.updateTag(convertToEntity(theTag));
+		 int affectedRows = tagDao.updateTag(convertToEntity(theTag));
+		 
+		 return affectedRows;
 
 	}
 
 	@Override
-	public void deleteTag(long theId) throws IllegalOperationServiceException {
+	public int deleteTag(long theId) throws IllegalOperationServiceException {
 
 		// check if there is at least one certificate, bounded with the tag for delete
 		// operation;
@@ -74,7 +82,8 @@ public class TagServiceImpl implements TagService {
 			throw new IllegalOperationServiceException(
 					"The tag is bounded with one or more certififcates and coudn't be deleted, tagId - " + theId);
 		}
-		tagDao.deleteTag(theId);
+		int affectedRows = tagDao.deleteTag(theId);
+		return affectedRows;
 	}
 
 	private TagDTO convertToDto(Tag tag) {

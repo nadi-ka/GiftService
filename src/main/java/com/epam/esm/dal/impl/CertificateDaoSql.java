@@ -40,12 +40,12 @@ public class CertificateDaoSql implements CertificateDao {
 
 	private static final Logger log = LogManager.getLogger(CertificateDaoSql.class);
 
-	private static final String sqlFindCertificateById = "SELECT * FROM giftCertificate WHERE Id = (?)";
-	private static final String sqlAddCertificate = "INSERT INTO giftCertificate (Name, Description, Price, CreateDate, LastUpdateDate, Duration) VALUES (?,?,?,?,?,?);";
-	private static final String sqlInsertIntoM2M = "INSERT INTO `tag-certificate` VALUES (?,?);";
-	private static final String sqlUpdateCertificate = "Update giftCertificate set Name = (?), Description = (?), Price = (?), LastUpdateDate = (?), Duration = (?) where Id = (?);";
-	private static final String sqlDeleteCertificateById = "DELETE FROM giftCertificate WHERE Id = (?);";
-	private static final String sqlDeleteFromM2M = "DELETE FROM `tag-certificate` WHERE IdCertificate = (?);";
+	private static final String sqlFindCertificateById = "SELECT * FROM GiftService.GiftCertificate WHERE Id = (?)";
+	private static final String sqlAddCertificate = "INSERT INTO GiftService.GiftCertificate (Name, Description, Price, CreateDate, LastUpdateDate, Duration) VALUES (?,?,?,?,?,?);";
+	private static final String sqlInsertIntoM2M = "INSERT INTO GiftService.`Tag-Certificate` VALUES (?,?);";
+	private static final String sqlUpdateCertificate = "Update GiftService.GiftCertificate set Name = (?), Description = (?), Price = (?), LastUpdateDate = (?), Duration = (?) where Id = (?);";
+	private static final String sqlDeleteCertificateById = "DELETE FROM GiftService.GiftCertificate WHERE Id = (?);";
+	private static final String sqlDeleteFromM2M = "DELETE FROM GiftService.`Tag-Certificate` WHERE IdCertificate = (?);";
 
 	@Autowired
 	public CertificateDaoSql(JdbcTemplate jdbcTemplate) {
@@ -95,9 +95,13 @@ public class CertificateDaoSql implements CertificateDao {
 	@Override
 	public GiftCertificate updateCertificate(GiftCertificate certificate) {
 
-		jdbcTemplate.update(sqlUpdateCertificate, certificate.getName(), certificate.getDescription(),
+		int affectedRows = jdbcTemplate.update(sqlUpdateCertificate, certificate.getName(), certificate.getDescription(),
 				certificate.getPrice(), certificate.getLastUpdateDate(), certificate.getDuration(),
 				certificate.getId());
+		
+		if (affectedRows == 0) {
+			return null;
+		}
 
 		return certificate;
 	}
@@ -106,7 +110,7 @@ public class CertificateDaoSql implements CertificateDao {
 	public List<GiftCertificate> findCertificates(List<FilterParam> filterParams, List<OrderParam> orderParams) {
 
 		List<GiftCertificate> certificates = new ArrayList<GiftCertificate>();
-		String sqlQuery = sqlBuilder.buildFindCertificatesQuery(filterParams, orderParams);
+		String sqlQuery = sqlBuilder.buildCertificatesQuery(filterParams, orderParams);
 
 		try {
 			certificates = jdbcTemplate.query(sqlQuery, new CertificateWithTagsMapper());
@@ -134,14 +138,16 @@ public class CertificateDaoSql implements CertificateDao {
 
 	@Transactional
 	@Override
-	public void deleteCertificate(long id) {
+	public int[] deleteCertificate(long id) {
 
 		int[] types = { Types.BIGINT };
 		// delete the data from M2M table;
-		jdbcTemplate.update(sqlDeleteFromM2M, new Object[] { id }, types);
+		int affectedRows1 = jdbcTemplate.update(sqlDeleteFromM2M, new Object[] { id }, types);
 
 		// delete the certificate from giftCetrificate table;
-		jdbcTemplate.update(sqlDeleteCertificateById, new Object[] { id }, types);
+		int affectedRows2 = jdbcTemplate.update(sqlDeleteCertificateById, new Object[] { id }, types);
+		
+		return new int[]{affectedRows1, affectedRows2};
 
 	}
 

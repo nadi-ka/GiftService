@@ -14,7 +14,7 @@ public final class SqlQueryBuilder {
 	@Autowired
 	private ColumnNameRequestParamMapper columnMapper;
 
-	private static final String sqlFindCertificatesWithTags = "SELECT giftcertificate.id, giftcertificate.name, description, price, createDate, lastUpdateDate, duration, tag.id, tag.name FROM giftcertificate JOIN `tag-certificate` ON giftcertificate.id = `tag-certificate`.idCertificate JOIN tag ON tag.id = `tag-certificate`.idTag";
+	private static final String sqlFindCertificatesWithTags = "SELECT GiftCertificate.Id, GiftCertificate.Name, Description, Price, CreateDate, LastUpdateDate, Duration, Tag.Id, Tag.Name FROM GiftService.GiftCertificate JOIN GiftService.`Tag-Certificate` ON GiftCertificate.Id = `Tag-Certificate`.IdCertificate JOIN GiftService.Tag ON Tag.Id = `Tag-Certificate`.IdTag";
 	private static final String WHERE = " WHERE ";
 	private static final String AND = " AND ";
 	private static final String OR = " OR ";
@@ -27,7 +27,7 @@ public final class SqlQueryBuilder {
 	private static final String QUOTE_SIGN = "'";
 	private static final String EMPTY_STRING = " ";
 
-	public String buildFindCertificatesQuery(List<FilterParam> filterParams, List<OrderParam> orderParams) {
+	public String buildCertificatesQuery(List<FilterParam> filterParams, List<OrderParam> orderParams) {
 
 		String sqlQuery = sqlFindCertificatesWithTags;
 

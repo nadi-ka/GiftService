@@ -28,12 +28,12 @@ public class TagDaoSql implements TagDao {
 
 	private final JdbcTemplate jdbcTemplate;
 
-	private static final String sqlFindAllTags = "SELECT * FROM tag;";
-	private static final String sqlFindTagById = "SELECT * FROM tag WHERE Id = (?)";
-	private static final String sqlAddTag = "INSERT INTO tag (Name) VALUES (?)";
-	private static final String sqlUpdateTag = "Update tag set Name = (?) where Id = (?);";
-	private static final String sqlDeleteTagById = "DELETE FROM tag WHERE Id = (?);";
-	private static final String sqlFindCertificateIdByTagId = "SELECT IdCertificate FROM `tag-certificate` WHERE IdTag = (?) LIMIT 1;";
+	private static final String sqlFindAllTags = "SELECT * FROM GiftService.Tag;";
+	private static final String sqlFindTagById = "SELECT * FROM GiftService.Tag WHERE Id = (?)";
+	private static final String sqlAddTag = "INSERT INTO GiftService.Tag (Name) VALUES (?)";
+	private static final String sqlUpdateTag = "Update GiftService.Tag set Name = (?) where Id = (?);";
+	private static final String sqlDeleteTagById = "DELETE FROM  GiftService.Tag WHERE Id = (?);";
+	private static final String sqlFindCertificateIdByTagId = "SELECT IdCertificate FROM  GiftService.`Tag-Certificate` WHERE IdTag = (?) LIMIT 1;";
 
 	private static final Logger log = LogManager.getLogger(TagDaoSql.class);
 

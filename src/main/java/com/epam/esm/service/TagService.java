@@ -13,8 +13,8 @@ public interface TagService {
 
 	TagDTO saveTag(TagDTO theTag);
 
-	void updateTag(TagDTO theTag);
+	int updateTag(TagDTO theTag);
 
-	void deleteTag(long theId) throws IllegalOperationServiceException;
+	int deleteTag(long theId) throws IllegalOperationServiceException;
 
 }

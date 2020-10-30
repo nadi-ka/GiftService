@@ -8,7 +8,6 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Component;
 
 import com.epam.esm.dal.constant.ColumnNameHolder;
-import com.epam.esm.dal.impl.CertificateDaoSql;
 import com.epam.esm.rest.parameter.ParameterConstant;
 
 @Component

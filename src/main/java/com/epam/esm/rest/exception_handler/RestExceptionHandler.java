@@ -6,8 +6,8 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
+import com.epam.esm.rest.exception.InvalidRequestParametersException;
 import com.epam.esm.rest.exception.NotFoundException;
-import com.epam.esm.service.exception.IllegalOperationServiceException;
 
 @ControllerAdvice
 public class RestExceptionHandler {
@@ -32,6 +32,14 @@ public class RestExceptionHandler {
 
 	@ExceptionHandler
 	public ResponseEntity<ErrorResponse> handleInvalidParamsException(MethodArgumentNotValidException exc) {
+
+		ErrorResponse error = new ErrorResponse(HttpStatus.BAD_REQUEST.value(), exc.getMessage(),
+				System.currentTimeMillis());
+		return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+	}
+	
+	@ExceptionHandler
+	public ResponseEntity<ErrorResponse> handleInvalidParamsException(InvalidRequestParametersException exc) {
 
 		ErrorResponse error = new ErrorResponse(HttpStatus.BAD_REQUEST.value(), exc.getMessage(),
 				System.currentTimeMillis());

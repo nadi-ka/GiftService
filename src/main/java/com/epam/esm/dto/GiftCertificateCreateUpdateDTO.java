@@ -10,19 +10,16 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
-
 public class GiftCertificateCreateUpdateDTO {
 	
-	private long id;
+	private Long id;
 	
-	@NotNull(message = "is required")
-	@NotBlank(message = "is required")
-	@Size(min = 3, max = 45, message = "must be grater or equal to 3 chars and less or equal to 45")
+	@NotBlank
+	@Size(max = 45, message = "must be less or equal to 45")
 	private String name;
 	
-	@NotNull(message = "is required")
 	@NotBlank(message = "is required")
-	@Size(min = 3, max = 100, message = "must be grater or equal to 3 chars and less or equal to 100")
+	@Size(max = 100, message = "must be less or equal to 100")
 	private String description;
 	
 	@NotNull(message = "is required")

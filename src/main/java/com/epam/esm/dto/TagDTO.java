@@ -1,8 +1,14 @@
 package com.epam.esm.dto;
 
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
+
 public class TagDTO {
 
 	private long id;
+	
+	@NotBlank
+	@Size(max = 45, message = "must be less or equal to 45")
 	private String name;
 
 	public TagDTO() {

@@ -2,6 +2,8 @@ package com.epam.esm.rest;
 
 import java.util.List;
 
+import javax.validation.Valid;
+
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -67,7 +69,7 @@ public class TagController {
 	 * tag's Id
 	 */
 	@PostMapping("/tags")
-	public TagDTO addTag(@RequestBody TagDTO theTag) {
+	public TagDTO addTag(@Valid @RequestBody TagDTO theTag) {
 
 		TagDTO newTag = tagService.saveTag(theTag);
 
@@ -79,7 +81,7 @@ public class TagController {
 	 * method returns Status Code = 200;
 	 */
 	@PutMapping("/tags")
-	public TagDTO updateTag(@RequestBody TagDTO theTag) {
+	public TagDTO updateTag(@Valid @RequestBody TagDTO theTag) {
 		
 		// check if the tag exists;
 				TagDTO tag = tagService.getTag(theTag.getId());
@@ -114,7 +116,7 @@ public class TagController {
 		} catch (IllegalOperationServiceException e) {
 			log.log(Level.WARN,
 					"The tag couldn't be deleted as it's bounded with one or more certificates - tagId" + tagId, e);
-			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
+			return ResponseEntity.status(HttpStatus.MOVED_PERMANENTLY).body(e.getMessage());
 		}
 
 		return ResponseEntity.status(HttpStatus.OK).body("The tag was successfully deleted, id - " + tagId);
